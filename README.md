@@ -1,6 +1,10 @@
 # FAV - Pedestrian detection project
+This project aims for better object detection of pedestrians from elevated camara views of public transport stations.
 
-
+# TODO
+1. Search for appropriate datasets.
+2. Build train and test pipeline to retrain an existing R-CNN model (MMDetection: https://github.com/open-mmlab/mmdetection).
+3. Evaluate the results.
 
 ## Datasets
 1. https://www.tugraz.at/institute/icg/research/team-bischof/lrs/downloads/longtermped/
