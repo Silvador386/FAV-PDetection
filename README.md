@@ -15,3 +15,5 @@ In Proc. IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2009
 2. http://personal.ie.cuhk.edu.hk/~ccloy/downloads_mall_dataset.html
 
 3. **http://p-destre.di.ubi.pt/**
+4. https://exposing.ai/oxford_town_centre/
+5. 
