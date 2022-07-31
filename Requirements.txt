@@ -3,6 +3,6 @@ torch
 torchvision
 matplotlib
 openmim
-mmcv
+mmcv-full
 mmdet
 

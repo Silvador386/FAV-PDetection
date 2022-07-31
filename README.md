@@ -4,6 +4,9 @@ This project aims for better object detection of pedestrians from elevated camar
 # TODO
 1. Search for appropriate datasets.
 2. Build train and test pipeline to retrain an existing R-CNN model (MMDetection: https://github.com/open-mmlab/mmdetection).
+   * Download and prepare customized dataset.
+   * Choose a model.
+   * Retrain and fine-tune the model.
 3. Evaluate the results.
 
 ## Datasets

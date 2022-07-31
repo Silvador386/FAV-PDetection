@@ -1,5 +1,10 @@
 .idea
 Amitia
+configs
+checkpoints
+demo
+mmdet
+tools
 /Datasets
 /yolov3_mobilenetv2_320_300e_coco.py
 /yolov3_mobilenetv2_320_300e_coco_20210719_215349-d18dff72.pth
