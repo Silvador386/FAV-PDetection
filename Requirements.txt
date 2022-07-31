@@ -2,3 +2,7 @@ numpy
 torch
 torchvision
 matplotlib
+openmim
+mmcv
+mmdet
+
