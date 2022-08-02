@@ -10,7 +10,17 @@ This project aims for better object detection of pedestrians from elevated camar
 3. Evaluate the results.
 
 ## Datasets
-1. https://www.tugraz.at/institute/icg/research/team-bischof/lrs/downloads/longtermped/
+1. [Mall Dataset](http://personal.ie.cuhk.edu.hk/~ccloy/downloads_mall_dataset.html)
+   * Availability: Downloadable, Requirements: **Only for research purposes**, can not be use commercially, cite.
+   * Contains ground truths of 60 000 pedestrians, Ground truth - head position.
+   * Video length: 2000 frames, Size 640x480, Frame rate< 2 Hz, Seemingly from one place.
+2. **[P-DESTRE](http://p-destre.di.ubi.pt/)** / **[Download](http://p-destre.di.ubi.pt/download.html)**
+   * Availability: Downloadable, Requirements: **Only for research purposes**, can not be use commercially, cite. (This dataset is freely available, under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license. Users can share the dataset only if they: 1) give credit to the citation below; 2) do not use the dataset for any commercial purposes, and 3) distribute any additions, transformations or changes to the dataset under this license.)
+   * Frame size: 3840 x 2160
+3. [TownCentre](https://exposing.ai/oxford_town_centre/)
+   * Availability: Unsupported
+4. dasf
+5. [Long-term Pedestrian Detection Dataset](https://www.tugraz.at/institute/icg/research/team-bischof/lrs/downloads/longtermped/)
    * Availability: Downloadable, Requirements: Cite?,
    * Single video without ground truth
    * **Unsuitable**
@@ -18,18 +28,6 @@ This project aims for better object detection of pedestrians from elevated camar
    Peter M. Roth, Sabine Sternig, Helmut Grabner and Horst Bischof
    In Proc. IEEE Conference on Computer Vision and Pattern Recognition (CVPR), 2009 
 
-2. http://personal.ie.cuhk.edu.hk/~ccloy/downloads_mall_dataset.html
-   * Availability: Downloadable, Requirements: **Only for research purposes**, can not be use commercially, cite
-   * Contains ground truths and features which are in matlab...
-   * Video length: 2000 frames, Size 640x480, Frame rate< 2 Hz
-3. **http://p-destre.di.ubi.pt/** / **http://p-destre.di.ubi.pt/download.html**
-   * Availability: Downloadable, Very neatly handled website with all the important information. 
-   * This dataset is freely available, under the Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International license. Users can share the dataset only if they: 1) give credit to the citation below; 2) do not use the dataset for any commercial purposes, and 3) distribute any additions, transformations or changes to the dataset under this license. 
-   * Frame size: 3840 x 2160
-   * 
-4. https://exposing.ai/oxford_town_centre/
-   * Availability: Seems to be unsupported anymore
-5. dasf
 
 
 ### Front view
