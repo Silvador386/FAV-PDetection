@@ -22,15 +22,21 @@ This project aims for better object detection of pedestrians from elevated camar
    * Bounding box, head, gender, height, etc.
    * Frame size: 3840 x 2160 (40 GB of video, several videos?), 269 subjects. 
 3. [PedX](http://pedx.io/)
-   * Commercially available, Copyright
+   * Availability: Downloadable, Requirements: **Commercially available**, Copyright
    * Front (car) view, 3 sequences, 2D/3D labels, [Data structure](https://github.com/umautobots/pedx)
-
-5. [TownCentre](https://exposing.ai/oxford_town_centre/)
+4. [WiderPerson](http://www.cbsr.ia.ac.cn/users/sfzhang/WiderPerson/)
+   * Availability: Downloadable, Requirements: **Only for research purposes**
+5. [Image VisDrone2019](http://aiskyeye.com/)
+   * Availability: Downloadable, Requirements: **Only for research purposes**
+6. [Stanford Drone Dataset](https://cvgl.stanford.edu/projects/uav_data/)
+   * Availability: Downloadable, Requirements: **Only for research purposes**
+7. [Citycam - vehicles](https://www.citycam-cmu.com/)
+   * Availability: Downloadable, Requirements: **Commercial**
+8. [TownCentre](https://exposing.ai/oxford_town_centre/)
    * Availability: **Unsupported**
-
-6. [Long-term Pedestrian Detection Dataset](https://www.tugraz.at/institute/icg/research/team-bischof/lrs/downloads/longtermped/)
-   * Availability: Downloadable, Requirements: Cite?,
-   * **Unsuitable**, Single video without ground truth
+9. [Long-term Pedestrian Detection Dataset](https://www.tugraz.at/institute/icg/research/team-bischof/lrs/downloads/longtermped/)
+    * Availability: Downloadable, Requirements: Cite?,
+    * **Unsuitable**, Single video without ground truth
 
 
 ### Front view
@@ -38,3 +44,4 @@ This project aims for better object detection of pedestrians from elevated camar
 
 ### Useful links:
 * [Machine learning datasets](https://www.datasetlist.com/)
+* [Deeplearning.buzz](https://deeplearning.buzz/deep-learning-datasets/)
