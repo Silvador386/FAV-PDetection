@@ -1,8 +1,0 @@
-numpy
-torch
-torchvision
-matplotlib
-openmim
-mmcv-full
-mmdet
-
