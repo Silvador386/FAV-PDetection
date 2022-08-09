@@ -23,6 +23,8 @@
    * Frame size: 3840 x 2160 (40 GB of video, several videos?), 269 subjects. 
 3. [WiderPerson](http://www.cbsr.ia.ac.cn/users/sfzhang/WiderPerson/)
    * Availability: Downloadable, Requirements: **Only for research purposes**.
+   * 13 382 images of pedestrians in different scenarios, 400k annotations
+   * Does not release the bounding box ground truths for test images. Users required to submit final prediction files.
 4. [Image VisDrone2019](http://aiskyeye.com/)
    * Availability: Downloadable, Requirements: **Only for research purposes**.
 

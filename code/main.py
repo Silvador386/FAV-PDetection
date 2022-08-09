@@ -32,12 +32,15 @@ def start_demo():
 def main():
     text_path = "../Datasets/P-DESTRE/original/annotation"
     annotations = load_txt_folder(text_path)
+    annotation_names = list(annotations.keys())
 
     video_path = "../Datasets/P-DESTRE/original/videos"
-    out_path = "../Datasets/P-DESTRE/COCO_Format/videos"
+    out_path = "../Datasets/P-DESTRE/coco_format/videos"
     video_names = files_in_folder(video_path)
-
-    pairs = [(name, ann) for name, ann in zip(annotations, video_names)]
+    #"08-11-2019-1-1.MP4"
+    ann_out = "../Datasets/P-DESTRE/coco_format/annotations"
+    convert_pdestre_to_coco(annotations[annotation_names[0]], out_path, "../Datasets/P-DESTRE/coco_format/annotations")
+    # video_to_jpg(video_path + "/" + "08-11-2019-1-1.MP4", out_path)
 
 
     # Testing image
