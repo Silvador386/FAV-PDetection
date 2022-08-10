@@ -53,7 +53,9 @@ def check_pdestre_dataset(new_annotations_folder, new_video_folder):
     return names_paired
 
 
+# converts paired videos to jpgs and annotations to json (COCO-style like)
 def convert_pdestre_dataset(new_annotations_folder, new_video_folder, convert_annotations_folder, convert_image_folder):
+
     names_paired = check_pdestre_dataset(new_annotations_folder, new_video_folder)
 
     # take each pair, convert video to jpgs, create new COCO-style annotation
@@ -62,27 +64,21 @@ def convert_pdestre_dataset(new_annotations_folder, new_video_folder, convert_an
         ann_path = new_annotations_folder + "/" + name + NEW_ANNOTATION_TYPE
 
         # test if already converted
+        likely_image_path = convert_image_folder + "/" + name + "_f0.jpg"
+        likely_ann_path = convert_annotations_folder + "/" + name + ".json"
 
-        # convert_video_to_jpg(name, video_path, convert_image_folder)
-        convert_pdestre_to_coco(ann_path, name, convert_annotations_folder, convert_image_folder)
+        if not os.path.isfile(likely_image_path):
+            convert_video_to_jpg(name, video_path, convert_image_folder)
+        if not os.path.isfile(likely_ann_path):
+            convert_pdestre_to_coco(ann_path, name, convert_annotations_folder, convert_image_folder)
+
+        # TODO test - one file only
         break
 
 
 def main():
-    convert_pdestre_dataset(NEW_ANNOTATIONS_FOLDER, NEW_VIDEO_FOLDER, CONVERTED_ANNOTATIONS_FOLDER, CONVERTED_IMAGE_FOLDER)
-
-    text_path = "../Datasets/P-DESTRE/original/annotation"
-    annotations = load_txt_folder(text_path)
-    annotation_names = list(annotations.keys())
-
-    video_path = "../Datasets/P-DESTRE/original/videos"
-    out_path = "../Datasets/P-DESTRE/coco_format/videos"
-    # video_names = files_in_folder(video_path)
-    #"08-11-2019-1-1.MP4"
-    ann_out = "../Datasets/P-DESTRE/coco_format/annotations"
-    # convert_pdestre_to_coco(annotations[annotation_names[0]], out_path, "../Datasets/P-DESTRE/coco_format/annotations")
-    # video_to_jpg(video_path + "/" + "08-11-2019-1-1.MP4", out_path)
-
+    convert_pdestre_dataset(NEW_ANNOTATIONS_FOLDER, NEW_VIDEO_FOLDER,
+                            CONVERTED_ANNOTATIONS_FOLDER, CONVERTED_IMAGE_FOLDER)
 
     # Testing image
     config_file = "../configs/my_custom_config.py"

@@ -14,6 +14,10 @@ def files_in_folder(path):
     return file_names
 
 
+# Converts video to jpg
+# Jpg file convention:
+#     Datasets/P-DESTRE/coco_format/videos/'video_name'_f%d.jpg'
+#     Video_name must be same as annotation name
 def convert_video_to_jpg(video_name, video_path, output_path):
     # filter incompatible files
     vidcap = cv2.VideoCapture(video_path)
@@ -24,17 +28,6 @@ def convert_video_to_jpg(video_name, video_path, output_path):
         success, image = vidcap.read()
         # print('Read a new frame: ', success)
         count += 1
-
-
-# Loads text files from specified folder
-def load_txt_folder(path):
-    annotations = {}
-    file_names = files_in_folder(path)
-    for file_name in file_names:
-        with open(path + "/" + file_name) as f:
-            annotations[file_name] = [line for line in f.readlines()]
-
-    return annotations
 
 
 # Converts annotation file to the support structure an saves it into another file.
@@ -85,27 +78,28 @@ def convert_pdestre_to_coco(ann_path, current_name, output_folder, image_folder)
         outfile.write(json_out)
 
 
-"""
-Convert video to jpg
-Jpg file convention:
-    Datasets/P-DESTRE/coco_format/videos/'video_name'_f%d.jpg'
-    Video_name must be same as annotation name
-"""
-
-
-# Loads videos from specified folder and converts them to jpgs and stores them into specified folder
-def convert_videos_to_jpgs(path, out_path):
-    for _, __, video_files in os.walk(path):
-        for video_name in video_files:
-            # filter incompatible files
-            if not video_name.startswith(".") and video_name == "08-11-2019-1-1.MP4":
-                video_path = path + "/" + video_name
-
-                vidcap = cv2.VideoCapture(video_path)
-                success, image = vidcap.read()
-                count = 0
-                while success:
-                    cv2.imwrite(out_path + "/" + video_name[:-4] + "_f%d.jpg" % count, image)  # save frame as JPEG file
-                    success, image = vidcap.read()
-                    # print('Read a new frame: ', success)
-                    count += 1
+# # Loads videos from specified folder and converts them to jpgs and stores them into specified folder
+# def convert_videos_to_jpgs(path, out_path):
+#     for _, __, video_files in os.walk(path):
+#         for video_name in video_files:
+#             # filter incompatible files
+#             if not video_name.startswith(".") and video_name == "08-11-2019-1-1.MP4":
+#                 video_path = path + "/" + video_name
+#
+#                 vidcap = cv2.VideoCapture(video_path)
+#                 success, image = vidcap.read()
+#                 count = 0
+#                 while success:
+#                     cv2.imwrite(out_path + "/" + video_name[:-4] + "_f%d.jpg" % count, image)  # save frame as JPEG file
+#                     success, image = vidcap.read()
+#                     # print('Read a new frame: ', success)
+#                     count += 1
+# Loads text files from specified folder
+# def load_txt_folder(path):
+#     annotations = {}
+#     file_names = files_in_folder(path)
+#     for file_name in file_names:
+#         with open(path + "/" + file_name) as f:
+#             annotations[file_name] = [line for line in f.readlines()]
+#
+#     return annotations
