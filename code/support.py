@@ -10,10 +10,20 @@ def files_in_folder(path):
     file_names = []
     for _, __, f_names in os.walk(path):
         for file_name in f_names:
-            # filter incompatible files
-            if not file_name.startswith("."):
-                file_names.append(file_name)
+            file_names.append(file_name)
     return file_names
+
+
+def convert_video_to_jpg(video_name, video_path, output_path):
+    # filter incompatible files
+    vidcap = cv2.VideoCapture(video_path)
+    success, image = vidcap.read()
+    count = 0
+    while success:
+        cv2.imwrite(output_path + "/" + video_name + "_f%d.jpg" % count, image)  # save frame as JPEG file
+        success, image = vidcap.read()
+        # print('Read a new frame: ', success)
+        count += 1
 
 
 # Loads text files from specified folder
@@ -28,10 +38,15 @@ def load_txt_folder(path):
 
 
 # Converts annotation file to the support structure an saves it into another file.
-def convert_pdestre_to_coco(ann_list, out_file, image_prefix):
-    image_folder = "../Datasets/P-DESTRE/coco_format/videos/"
-    current_name = "08-11-2019-1-1"
-    output_folder = "../Datasets/P-DESTRE/coco_format/annotations/"
+def convert_pdestre_to_coco(ann_path, current_name, output_folder, image_folder):
+    # load annotation as list
+    ann_list = []
+    with open(ann_path, "r") as reader:
+        ann_list = reader.readlines()
+
+    # image_folder = "../Datasets/P-DESTRE/coco_format/videos/"
+    # current_name = "08-11-2019-1-1"
+    # output_folder = "../Datasets/P-DESTRE/coco_format/annotations/"
 
     category = {"id": 0, "name": "person"}  # only one category - person
 
@@ -52,7 +67,7 @@ def convert_pdestre_to_coco(ann_list, out_file, image_prefix):
 
         # load correct image
         if frame_idx > previous:
-            img_file_name = image_folder + current_name + f"_f{frame_idx}.jpg"
+            img_file_name = image_folder + "/" + current_name + f"_f{frame_idx}.jpg"
             image = mmcv.imread(img_file_name)
             width, height = image.shape[:2]
             image_info = dict(filename=img_file_name, width=width, height=height, id=frame_idx)
@@ -66,7 +81,7 @@ def convert_pdestre_to_coco(ann_list, out_file, image_prefix):
 
     # convert data to json a store them
     json_out = json.dumps(final)
-    with open(output_folder + current_name + ".json", "w") as outfile:
+    with open(output_folder + "/" + current_name + ".json", "w") as outfile:
         outfile.write(json_out)
 
 
@@ -76,19 +91,6 @@ Jpg file convention:
     Datasets/P-DESTRE/coco_format/videos/'video_name'_f%d.jpg'
     Video_name must be same as annotation name
 """
-
-
-def video_to_jpg(video_path, output_path):
-    # filter incompatible files
-    video_name = video_path.split("/")[-1]
-    vidcap = cv2.VideoCapture(video_path)
-    success, image = vidcap.read()
-    count = 0
-    while success:
-        cv2.imwrite(output_path + "/" + video_name[:-4] + "_f%d.jpg" % count, image)  # save frame as JPEG file
-        success, image = vidcap.read()
-        # print('Read a new frame: ', success)
-        count += 1
 
 
 # Loads videos from specified folder and converts them to jpgs and stores them into specified folder
@@ -107,4 +109,3 @@ def convert_videos_to_jpgs(path, out_path):
                     success, image = vidcap.read()
                     # print('Read a new frame: ', success)
                     count += 1
-
