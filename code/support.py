@@ -37,10 +37,6 @@ def convert_pdestre_to_coco(ann_path, current_name, output_folder, image_folder)
     with open(ann_path, "r") as reader:
         ann_list = reader.readlines()
 
-    # image_folder = "../Datasets/P-DESTRE/coco_format/videos/"
-    # current_name = "08-11-2019-1-1"
-    # output_folder = "../Datasets/P-DESTRE/coco_format/annotations/"
-
     category = {"id": 0, "name": "person"}  # only one category - person
 
     final = {"images": [],

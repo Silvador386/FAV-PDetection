@@ -81,7 +81,7 @@ def main():
                             CONVERTED_ANNOTATIONS_FOLDER, CONVERTED_IMAGE_FOLDER)
 
     # Testing image
-    config_file = "../configs/my_custom_config.py"
+    config_file = "my_custom_config.py"
     checkpoint_file = '../checkpoints/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth'
     model = init_detector(config_file, checkpoint_file, device='cuda:0')
     img = "../Datasets/P-DESTRE/coco_format/videos/08-11-2019-1-1_f10.jpg"
