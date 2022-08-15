@@ -1,11 +1,11 @@
-_base_ = '../configs/faster_rcnn/faster_rcnn_r50_fpn_mstrain_3x_coco.py'
-
+# _base_ = '../configs/faster_rcnn/faster_rcnn_r50_fpn_mstrain_3x_coco.py'
+_base_ = "../configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py"
 
 # 1. dataset settings
 ann_file = "../Datasets/P-DESTRE/coco_format/annotations/08-11-2019-1-1.json"
-img_prefix = "../Datasets/P-DESTRE/coco_format/videos"
+img_prefix = "../Datasets/P-DESTRE/coco_format/videos/"
 dataset_type = 'CocoDataset'
-classes = ("person", )
+classes = ("person",)
 num_classes = len(classes)
 
 data = dict(
@@ -31,8 +31,6 @@ data = dict(
         img_prefix=img_prefix))
 
 # 2. model settings
-
-# explicitly over-write all the `num_classes` field from default 80 to 5.
 model = dict(
     roi_head=dict(
         bbox_head=[
@@ -51,3 +49,9 @@ model = dict(
     # explicitly over-write all the `num_classes` field from default 80 to 5.
     # https://github.com/open-mmlab/mmdetection/issues/4364
     mask_head=dict(type='FCNMaskHead', num_classes=num_classes)))
+
+
+# model = dict(
+#     roi_head=dict(
+#         bbox_head=dict(type='Shared2FCBBoxHead', num_classes=num_classes),
+#         mask_head=dict(type='FCNMaskHead', num_classes=num_classes)))

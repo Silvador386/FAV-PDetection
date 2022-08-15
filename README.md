@@ -24,10 +24,10 @@
 3. [WiderPerson](http://www.cbsr.ia.ac.cn/users/sfzhang/WiderPerson/)
    * Availability: Downloadable, Requirements: **Only for research purposes**.
    * 13 382 images of pedestrians in different scenarios, 400k annotations
-   * Does not release the bounding box ground truths for test images. Users required to submit final prediction files.
+   * Does not release the bounding box ground truths for test images. Users are required to submit final prediction files.
 4. [Image VisDrone2019](http://aiskyeye.com/)
    * Availability: Downloadable, Requirements: **Only for research purposes**.
-
+   * Different datasets depending on usage. From drone platforms, in China.
 ### Inappropriate view point locations
 5. [PedX](http://pedx.io/)
    * Availability: Downloadable, Requirements: **Commercially available**, Copyright
@@ -38,6 +38,7 @@
    * Top view via drone cam - Unsuitable.
 7. [Citycam - vehicles](https://www.citycam-cmu.com/)
    * Availability: Downloadable, Requirements: **Commercial**.
+   * Vehicles only, CCTV camera images
 8. [Eurocity dataset](https://eurocity-dataset.tudelft.nl/eval/overview/examples)
    * Availability: Downloadable, Requirements: **Only for research purposes**.
    * Front view - Unsuitable.

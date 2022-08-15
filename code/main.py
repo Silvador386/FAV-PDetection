@@ -1,7 +1,7 @@
-from mmdet.apis import init_detector, inference_detector
+from mmdet.apis import init_detector, train_detector, inference_detector, show_result_pyplot
 import mmcv
 import os
-import create_dataset
+import pdestre
 from support import *
 from settings import *
 
@@ -81,13 +81,46 @@ def main():
                             CONVERTED_ANNOTATIONS_FOLDER, CONVERTED_IMAGE_FOLDER)
 
     # Testing image
-    config_file = "my_custom_config.py"
+    config_file = "coco_custom_config.py"
     checkpoint_file = '../checkpoints/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth'
     model = init_detector(config_file, checkpoint_file, device='cuda:0')
     img = "../Datasets/P-DESTRE/coco_format/videos/08-11-2019-1-1_f10.jpg"
 
     result = inference_detector(model, img)
     model.show_result(img, result, out_file='../Datasets/P-DESTRE/test.jpg')
+
+
+def test_other():
+    from mid_config import cfg
+    from mmdet.datasets import build_dataset
+    from mmdet.models import build_detector
+    import os.path as osp
+    from pdestre import PDESTRE
+
+
+    convert_pdestre_dataset(NEW_ANNOTATIONS_FOLDER, NEW_VIDEO_FOLDER,
+                            CONVERTED_ANNOTATIONS_FOLDER, CONVERTED_IMAGE_FOLDER)
+
+    datasets = [build_dataset(cfg.data.train)]
+
+    model = build_detector(cfg.model, train_cfg=cfg.get('train_cfg'), test_cfg=cfg.get('test_cfg'))
+    model.CLASSES = ("person", )
+
+    train_detector(model, datasets, cfg, distributed=False, validate=True, meta=dict())
+
+    # print(cfg.data.train)
+    # # Build dataset
+    # datasets = [build_dataset(cfg.data.train)]
+    #
+    # # Build the detector
+    # model = build_detector(cfg.model, train_cfg=cfg.get("train_cfg"),
+    #                         test_cfg=cfg.get("test_cfg"))
+    # # Add an attribute for visualization convenience
+    # model.CLASSES = datasets[0].CLASSES
+    #
+    # # Create work_dir
+    # mmcv.mkdir_or_exist(osp.abspath(cfg.work_dir))
+    # train_detector(model, datasets, cfg, distributed=False, validate=True, meta=dict())
 
     # Testing video
     # video = mmcv.VideoReader("../Datasets/P-DESTRE/videos/08-11-2019-1-1.MP4")
@@ -101,3 +134,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    # test_other()

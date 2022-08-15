@@ -45,23 +45,24 @@ def convert_pdestre_to_coco(ann_path, current_name, output_folder, image_folder)
 
     final["categories"].append(category)
 
-    previous = 0  # checks if on a new frame
-    for ann_line in ann_list:
+    previous = int(ann_list[0][0]) - 1  # checks if on a new frame
+    for id, ann_line in enumerate(ann_list):
         ann_line = ann_line.split(",")
 
         # select data
         frame_idx = int(ann_line[0])  # current frame
-        id = int(ann_line[1])
+        # id = int(ann_line[1])
         bbox = [float(val) for val in ann_line[2:6]]
 
         # load correct image
         if frame_idx > previous:
-            img_file_name = image_folder + "/" + current_name + f"_f{frame_idx}.jpg"
-            image = mmcv.imread(img_file_name)
+            img_file_name = current_name + f"_f{frame_idx}.jpg"
+            image = mmcv.imread(image_folder + "/" + img_file_name)
             width, height = image.shape[:2]
-            image_info = dict(filename=img_file_name, width=width, height=height, id=frame_idx)
+            image_info = dict(file_name=img_file_name, width=width, height=height, id=frame_idx)
             final["images"].append(image_info)
             previous += 1
+
         # load annotation
         # TODO check if the empty params have any effect on model
         ann_info = dict(image_id=frame_idx, bbox=bbox, category_id=0, id=id,
