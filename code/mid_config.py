@@ -32,7 +32,8 @@ cfg.data.val.classes = cfg.classes
 cfg.model.roi_head.bbox_head.num_classes = 1
 # We can still use the pre-trained Mask RCNN model though we do not need to
 # use the mask branch.
-cfg.load_from = "../checkpoints/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth"
+# cfg.load_from = "../checkpoints/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth"
+cfg.load_from = "./tutorial_exps/latest.pth"
 
 # Set up working dir to save files and logs.
 cfg.work_dir = "./tutorial_exps"
@@ -42,13 +43,15 @@ cfg.work_dir = "./tutorial_exps"
 cfg.optimizer.lr = 0.02 / 8
 cfg.lr_config.warmup = None
 cfg.log_config.interval = 10
+cfg.runner = dict(type='EpochBasedRunner', max_epochs=1)
+cfg.checkpoint_config = dict(interval=10)
 
 # Change the evaluation metric since we use customized dataset.
 cfg.evaluation.metric = "bbox"
 # We can set the evaluation interval to reduce the evalueation times
-cfg.evaluation.interval = 12
+cfg.evaluation.interval = 3
 # We can set the checkpoint saving interval to reduce the storage cost
-cfg.checkpoint_config.interval = 12
+cfg.checkpoint_config.interval = 3
 
 # Set seed thus the results are more reproducible
 cfg.seed = 0

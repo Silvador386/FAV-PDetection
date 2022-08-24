@@ -59,38 +59,42 @@ def convert_pdestre_dataset(new_annotations_folder, new_video_folder, convert_an
     names_paired = check_pdestre_dataset(new_annotations_folder, new_video_folder)
 
     # take each pair, convert video to jpgs, create new COCO-style annotation
-    for name in names_paired:
+    for i, name in enumerate(names_paired):
         video_path = new_video_folder + "/" + name + NEW_VIDEO_TYPE
         ann_path = new_annotations_folder + "/" + name + NEW_ANNOTATION_TYPE
 
-        # test if already converted
-        likely_image_path = convert_image_folder + "/" + name + "_f0.jpg"
-        likely_ann_path = convert_annotations_folder + "/" + name + ".json"
+        # # test if already converted
+        # likely_image_path = convert_image_folder + "/" + name + "_f00000.jpg"
+        # likely_ann_path = convert_annotations_folder + "/" + name + ".json"
+        #
+        # if not os.path.isfile(likely_image_path):
+        #     convert_video_to_jpg(name, video_path, convert_image_folder)
+        # if not os.path.isfile(likely_ann_path):
+        #     convert_pdestre_to_coco(ann_path, name, convert_annotations_folder, convert_image_folder)
 
-        if not os.path.isfile(likely_image_path):
-            convert_video_to_jpg(name, video_path, convert_image_folder)
-        if not os.path.isfile(likely_ann_path):
-            convert_pdestre_to_coco(ann_path, name, convert_annotations_folder, convert_image_folder)
+        convert_dataset(ann_path, video_path, name, convert_annotations_folder, convert_image_folder)
+
 
         # TODO test - one file only
-        break
+        if i == 10:
+            break
 
 
 def main():
-    convert_pdestre_dataset(NEW_ANNOTATIONS_FOLDER, NEW_VIDEO_FOLDER,
-                            CONVERTED_ANNOTATIONS_FOLDER, CONVERTED_IMAGE_FOLDER)
+    # convert_pdestre_dataset(NEW_ANNOTATIONS_FOLDER, NEW_VIDEO_FOLDER,
+    #                         CONVERTED_ANNOTATIONS_FOLDER, CONVERTED_IMAGE_FOLDER)
 
     # Testing image
     config_file = "coco_custom_config.py"
     checkpoint_file = '../checkpoints/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth'
     model = init_detector(config_file, checkpoint_file, device='cuda:0')
-    img = "../Datasets/P-DESTRE/coco_format/videos/08-11-2019-1-1_f10.jpg"
+    img = "../Datasets/P-DESTRE/coco_format/videos/08-11-2019-1-1_f00010.jpg"
 
     result = inference_detector(model, img)
     model.show_result(img, result, out_file='../Datasets/P-DESTRE/test.jpg')
 
 
-def test_other():
+def train():
     from mid_config import cfg
     from mmdet.datasets import build_dataset
     from mmdet.models import build_detector
@@ -101,37 +105,52 @@ def test_other():
     convert_pdestre_dataset(NEW_ANNOTATIONS_FOLDER, NEW_VIDEO_FOLDER,
                             CONVERTED_ANNOTATIONS_FOLDER, CONVERTED_IMAGE_FOLDER)
 
-    datasets = [build_dataset(cfg.data.train)]
+    datasets = [build_dataset(cfg.data.train)]  # mmdet/datasets/ utils.py - change __check_head
 
     model = build_detector(cfg.model, train_cfg=cfg.get('train_cfg'), test_cfg=cfg.get('test_cfg'))
     model.CLASSES = ("person", )
 
-    train_detector(model, datasets, cfg, distributed=False, validate=True, meta=dict())
+    train_detector(model, datasets, cfg, distributed=False, validate=True)
 
-    # print(cfg.data.train)
-    # # Build dataset
-    # datasets = [build_dataset(cfg.data.train)]
-    #
-    # # Build the detector
-    # model = build_detector(cfg.model, train_cfg=cfg.get("train_cfg"),
-    #                         test_cfg=cfg.get("test_cfg"))
-    # # Add an attribute for visualization convenience
-    # model.CLASSES = datasets[0].CLASSES
-    #
-    # # Create work_dir
-    # mmcv.mkdir_or_exist(osp.abspath(cfg.work_dir))
-    # train_detector(model, datasets, cfg, distributed=False, validate=True, meta=dict())
+    img = mmcv.imread("../Datasets/P-DESTRE/coco_format/videos/08-11-2019-1-1_f00010.jpg")
 
-    # Testing video
-    # video = mmcv.VideoReader("../Datasets/P-DESTRE/videos/08-11-2019-1-1.MP4")
-    # for frame in video:
-    #     result = inference_detector(model, frame)
-    #     model.show_result(frame, result, wait_time=1, out_file='../demo/test.jpg')
-    #     img = cv2.imread('../demo/test.jpg')
-    #     cv2.imshow("", img)
-    # print(videos)
+    model.cfg = cfg
+    result = inference_detector(model, img)
+    show_result_pyplot(model, img, result)
+
+
+def test():
+    from mid_config import cfg
+    from mmdet.models import build_detector
+
+    model = build_detector(cfg.model, train_cfg=cfg.get('train_cfg'), test_cfg=cfg.get('test_cfg'))
+
+    img = mmcv.imread("../Datasets/P-DESTRE/coco_format/videos/08-11-2019-1-1_f00010.jpg")
+
+    model.cfg = cfg
+    result = inference_detector(model, img)
+    show_result_pyplot(model, img, result)
 
 
 if __name__ == "__main__":
-    main()
-    # test_other()
+    # # Check Pytorch installation
+    # import torch, torchvision
+    #
+    # print(torch.__version__, torch.cuda.is_available())
+    #
+    # # Check MMDetection installation
+    # import mmdet
+    #
+    # print(mmdet.__version__)
+    #
+    # # Check mmcv installation
+    # from mmcv.ops import get_compiling_cuda_version, get_compiler_version
+    #
+    # print(get_compiling_cuda_version())
+    # print(get_compiler_version())
+
+    # main()
+    # train()
+    # test()
+
+    merge_json_files(CONVERTED_ANNOTATIONS_FOLDER, "pdestre_large", "../Datasets/P-DESTRE/coco_format/large")

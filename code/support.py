@@ -2,6 +2,7 @@ import os
 import cv2
 import json
 
+
 # Return file names of content in the folder
 import mmcv
 
@@ -16,24 +17,25 @@ def files_in_folder(path):
 
 # Converts video to jpg
 # Jpg file convention:
-#     Datasets/P-DESTRE/coco_format/videos/'video_name'_f%d.jpg'
+#     Datasets/P-DESTRE/coco_format/videos/'video_name'_f%05d.jpg'
 #     Video_name must be same as annotation name
 def convert_video_to_jpg(video_name, video_path, output_path):
-    # filter incompatible files
+    print(f"Converting video from: {video_path}")
     vidcap = cv2.VideoCapture(video_path)
     success, image = vidcap.read()
     count = 0
     while success:
-        cv2.imwrite(output_path + "/" + video_name + "_f%d.jpg" % count, image)  # save frame as JPEG file
+        cv2.imwrite(output_path + "/" + video_name + f"_f{count:05}.jpg", image)  # save frame as JPEG file
         success, image = vidcap.read()
         # print('Read a new frame: ', success)
         count += 1
+    print("Converting finished.")
 
 
 # Converts annotation file to the support structure an saves it into another file.
 def convert_pdestre_to_coco(ann_path, current_name, output_folder, image_folder):
     # load annotation as list
-    ann_list = []
+    print(f"Converting annotations from: {ann_path}")
     with open(ann_path, "r") as reader:
         ann_list = reader.readlines()
 
@@ -53,10 +55,11 @@ def convert_pdestre_to_coco(ann_path, current_name, output_folder, image_folder)
         frame_idx = int(ann_line[0])  # current frame
         # id = int(ann_line[1])
         bbox = [float(val) for val in ann_line[2:6]]
+        area = bbox[2] * bbox[3]
 
         # load correct image
         if frame_idx > previous:
-            img_file_name = current_name + f"_f{frame_idx}.jpg"
+            img_file_name = current_name + f"_f{frame_idx:05}.jpg"
             image = mmcv.imread(image_folder + "/" + img_file_name)
             width, height = image.shape[:2]
             image_info = dict(file_name=img_file_name, width=width, height=height, id=frame_idx)
@@ -66,37 +69,111 @@ def convert_pdestre_to_coco(ann_path, current_name, output_folder, image_folder)
         # load annotation
         # TODO check if the empty params have any effect on model
         ann_info = dict(image_id=frame_idx, bbox=bbox, category_id=0, id=id,
-                        segmentation=[], area=0, iscrowd=0)
+                        area=area, iscrowd=0)
         final["annotations"].append(ann_info)
 
     # convert data to json a store them
     json_out = json.dumps(final)
-    with open(output_folder + "/" + current_name + ".json", "w") as outfile:
+    out_path = output_folder + "/" + current_name + ".json"
+    with open(out_path, "w") as outfile:
+        print(f"Storing annotations to json at: {out_path}")
         outfile.write(json_out)
 
 
-# # Loads videos from specified folder and converts them to jpgs and stores them into specified folder
-# def convert_videos_to_jpgs(path, out_path):
-#     for _, __, video_files in os.walk(path):
-#         for video_name in video_files:
-#             # filter incompatible files
-#             if not video_name.startswith(".") and video_name == "08-11-2019-1-1.MP4":
-#                 video_path = path + "/" + video_name
-#
-#                 vidcap = cv2.VideoCapture(video_path)
-#                 success, image = vidcap.read()
-#                 count = 0
-#                 while success:
-#                     cv2.imwrite(out_path + "/" + video_name[:-4] + "_f%d.jpg" % count, image)  # save frame as JPEG file
-#                     success, image = vidcap.read()
-#                     # print('Read a new frame: ', success)
-#                     count += 1
-# Loads text files from specified folder
-# def load_txt_folder(path):
-#     annotations = {}
-#     file_names = files_in_folder(path)
-#     for file_name in file_names:
-#         with open(path + "/" + file_name) as f:
-#             annotations[file_name] = [line for line in f.readlines()]
-#
-#     return annotations
+def convert_dataset(ann_path, video_path, current_name, output_folder, image_folder, frame_rate=10):
+    """
+    1. Take annotations at ann_path, take video at video_path
+    2. Read annotation and for specific frame (each 10th), create specific frame jpg from video and move to the next.
+    """
+    out_path = output_folder + "/" + current_name + ".json"
+    # check if annotation already exists
+    if os.path.isfile(out_path):
+        return
+    # load video
+    print(f"Converting video from: {video_path}")
+    vidcap = cv2.VideoCapture(video_path)
+
+    # load annotations as list
+    print(f"Converting annotations from: {ann_path}")
+    with open(ann_path, "r") as reader:
+        ann_list = reader.readlines()
+
+    category = {"id": 0, "name": "person"}  # only one category - person
+
+    final = {"images": [],
+             "annotations": [],
+             "categories": []}
+
+    final["categories"].append(category)
+
+    previous = 0
+    img_idx = 0
+    for i, ann_line in enumerate(ann_list):
+        ann_line = ann_line.split(",")
+        frame_idx = int(ann_line[0])  # current frame
+        if frame_idx % frame_rate == 0:
+            if frame_idx > previous:  # new frame in annotations -> create corresponding jpg
+                img_file_name = image_folder + "/" + current_name + f"_f{frame_idx:05}.jpg"
+
+                # Checks if the image already exists
+                if os.path.isfile(img_file_name):
+                    continue
+
+                # Convert the image
+                while img_idx < frame_idx:
+                    success, image = vidcap.read()
+                    if not success:
+                        print("vidcap.read() not successful!")
+                    img_idx += 1
+                    if img_idx == frame_idx:
+                        cv2.imwrite(img_file_name, image)  # save frame as JPEG file
+
+                # store the image info
+                image = mmcv.imread(img_file_name)
+                width, height = image.shape[:2]
+                image_info = dict(file_name=img_file_name, width=width, height=height, id=frame_idx)
+                final["images"].append(image_info)
+                previous = frame_idx
+
+            # store annotation
+            bbox = [float(val) for val in ann_line[2:6]]
+            area = bbox[2] * bbox[3]
+            id = int(current_name.replace("-", "").replace("2019", "") + str(i))
+            # TODO check if the empty params have any effect on model
+            ann_info = dict(image_id=frame_idx, bbox=bbox, category_id=0, id=id,
+                            area=area, iscrowd=0)
+            final["annotations"].append(ann_info)
+
+    # convert data to json a store them
+    json_out = json.dumps(final)
+    with open(out_path, "w") as outfile:
+        print(f"Storing annotations to json at: {out_path}")
+        outfile.write(json_out)
+
+
+# Merges all json files in the folder to a new json file.
+def merge_json_files(json_folder, name, out_folder):
+    files = files_in_folder(json_folder)
+    out_path = out_folder + "/" + name + ".json"
+    result = {}
+    # Checks if the file already exists
+    if os.path.isfile(out_path):
+        return
+
+    for file in files:
+        if file.endswith(".json") and file != name + ".json":
+            with open(json_folder + "/" + file, "r") as reader:
+                current = json.load(reader)
+                if len(list(result.keys())) == 0:
+                    for key in list(current.keys())[:-1]:
+                        result[key] = []
+                # for unique values
+                for var in list(current.keys())[:-1]:
+                    result[var].extend(current[var])
+                # for same values (categories)
+                result["categories"] = current["categories"]
+
+    with open(out_path, "w") as outfile:
+        json.dump(result, outfile)
+
+
