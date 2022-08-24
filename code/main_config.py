@@ -44,10 +44,10 @@ cfg.work_dir = "./train_exports"
 
 # The original learning rate is set for 8-GPU training.
 # We divide it by 8 since we only use 1 GPU.
-cfg.optimizer.lr = 0.02 / 8
+# cfg.optimizer.lr = 0.02 / 8
 cfg.lr_config.warmup = None
-cfg.log_config.interval = 10
-cfg.runner = dict(type='EpochBasedRunner', max_epochs=2)
+cfg.log_config.interval = 20
+cfg.runner = dict(type='EpochBasedRunner', max_epochs=5)
 cfg.checkpoint_config = dict(interval=10)
 
 # Change the evaluation metric since we use customized dataset.

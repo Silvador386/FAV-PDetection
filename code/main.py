@@ -94,7 +94,7 @@ def convert_pdestre_dataset(new_annotations_folder, new_video_folder, convert_an
         convert_dataset(ann_path, video_path, name, convert_annotations_folder, convert_image_folder, frame_rate=frame_rate)
 
         # TODO test - one file only
-        if i == 10:
+        if i == 30:
             break
 
 
@@ -105,14 +105,8 @@ def prepare_data():
     merge_json_files(CONVERTED_ANNOTATIONS_FOLDER, "pdestre_large", "../Datasets/P-DESTRE/coco_format/large")
 
 
-def main():
-    prepare_data()
-    train()
-    # test()
-
-
 def train():
-    from mid_config import cfg
+    from main_config import cfg
     from mmdet.datasets import build_dataset
     from mmdet.models import build_detector
 
@@ -131,31 +125,36 @@ def train():
 
 
 def test():
-    from mid_config import cfg
+    from main_config import cfg
     from mmdet.models import build_detector
 
-    model = build_detector(cfg.model, train_cfg=cfg.get('train_cfg'), test_cfg=cfg.get('test_cfg'))
-
-    img = mmcv.imread("../Datasets/P-DESTRE/coco_format/videos/08-11-2019-1-1_f00010.jpg")
-
-    model.cfg = cfg
-    result = inference_detector(model, img)
-    show_result_pyplot(model, img, result)
-    model.show_result(img, result, out_file="../Datasets/P-DESTRE/test0.jpg")
+    # Control
+    # config_file = '../configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py'
+    # checkpoint_file = '../checkpoints/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth'
+    # out_prefix = "../results/control"
 
     # Testing image
-    config_file = "unused/coco_custom_config.py"
-    checkpoint_file = '../checkpoints/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth'
+    image_rate = 10
+    config_file = cfg
+    checkpoint_file = './train_exports/latest.pth'
+    out_prefix = "../results/pdestre"
     model = init_detector(config_file, checkpoint_file, device='cuda:0')
-    img = "../Datasets/P-DESTRE/coco_format/videos/08-11-2019-1-1_f00010.jpg"
 
-    result = inference_detector(model, img)
-    model.show_result(img, result, out_file='../Datasets/P-DESTRE/test.jpg')
+    test_img_prefix = "../Datasets/city/images"
+
+    image_names = files_in_folder(test_img_prefix)
+
+    for i, image_name in enumerate(image_names):
+        if i % image_rate == 0:
+            img = mmcv.imread(test_img_prefix + "/" + image_name)
+            result = inference_detector(model, img)
+            # show_result_pyplot(model, img, result)
+            model.show_result(img, result, out_file=out_prefix + f"/{i:05}.jpg")
 
 
 if __name__ == "__main__":
-
-    main()
+    # convert_video_to_jpg("video_20220603-1218", "../Datasets/city/video_20220603-1218.mp4", "../Datasets/city/images")
+    # prepare_data()
     # train()
-    # test()
+    test()
 

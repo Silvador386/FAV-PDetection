@@ -1,12 +1,10 @@
 import os
 import cv2
 import json
-
-
-# Return file names of content in the folder
 import mmcv
 
 
+# Return file names of content in the folder
 def files_in_folder(path):
     file_names = []
     for _, __, f_names in os.walk(path):
@@ -19,13 +17,14 @@ def files_in_folder(path):
 # Jpg file convention:
 #     Datasets/P-DESTRE/coco_format/videos/'video_name'_f%05d.jpg'
 #     Video_name must be same as annotation name
-def convert_video_to_jpg(video_name, video_path, output_path):
+def convert_video_to_jpg(video_name, video_path, output_path, frame_rate=10):
     print(f"Converting video from: {video_path}")
     vidcap = cv2.VideoCapture(video_path)
     success, image = vidcap.read()
     count = 0
     while success:
-        cv2.imwrite(output_path + "/" + video_name + f"_f{count:05}.jpg", image)  # save frame as JPEG file
+        if count % frame_rate == 0:
+            cv2.imwrite(output_path + "/" + video_name + f"_f{count:05}.jpg", image)  # save frame as JPEG file
         success, image = vidcap.read()
         # print('Read a new frame: ', success)
         count += 1
