@@ -4,51 +4,55 @@ from mmdet.apis import set_random_seed
 
 cfg = Config.fromfile("../configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py")
 
+_data_root = '../Datasets/P-DESTRE/coco_format/'
+_ann_file = "large/pdestre_large.json"
+_img_prefix = "videos/"
+
 # cfg.fp16 = dict(loss_scale_512.)
 cfg.device = "cuda"
 cfg.classes = ("person", )
 cfg.dataset_type = "CocoDataset"
 
 cfg.data.test.type = 'CocoDataset'
-cfg.data.test.data_root = '../Datasets/P-DESTRE/coco_format/'
-cfg.data.test.ann_file = 'annotations/08-11-2019-1-1.json'
-cfg.data.test.img_prefix = 'videos/'
+cfg.data.test.data_root = _data_root
+cfg.data.test.ann_file = _ann_file
+cfg.data.test.img_prefix = _img_prefix
 cfg.data.test.classes = cfg.classes
 
 
 cfg.data.train.type = 'CocoDataset'
-cfg.data.train.data_root = '../Datasets/P-DESTRE/coco_format/'
-cfg.data.train.ann_file = 'annotations/08-11-2019-1-1.json'
-cfg.data.train.img_prefix = 'videos/'
+cfg.data.train.data_root = _data_root
+cfg.data.train.ann_file = _ann_file
+cfg.data.train.img_prefix = _img_prefix
 cfg.data.train.classes = cfg.classes
 
 cfg.data.val.type = 'CocoDataset'
-cfg.data.val.data_root = '../Datasets/P-DESTRE/coco_format/'
-cfg.data.val.ann_file = 'annotations/08-11-2019-1-1.json'
-cfg.data.val.img_prefix = 'videos/'
+cfg.data.val.data_root = _data_root
+cfg.data.val.ann_file = _ann_file
+cfg.data.val.img_prefix = _img_prefix
 cfg.data.val.classes = cfg.classes
 
 # modify num classes of the model in box head
 cfg.model.roi_head.bbox_head.num_classes = 1
 # We can still use the pre-trained Mask RCNN model though we do not need to
 # use the mask branch.
-# cfg.load_from = "../checkpoints/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth"
-cfg.load_from = "./tutorial_exps/latest.pth"
+cfg.load_from = "../checkpoints/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth"
+# cfg.load_from = "./tutorial_exps/latest.pth"
 
 # Set up working dir to save files and logs.
-cfg.work_dir = "./tutorial_exps"
+cfg.work_dir = "./train_exports"
 
 # The original learning rate is set for 8-GPU training.
 # We divide it by 8 since we only use 1 GPU.
 cfg.optimizer.lr = 0.02 / 8
 cfg.lr_config.warmup = None
 cfg.log_config.interval = 10
-cfg.runner = dict(type='EpochBasedRunner', max_epochs=1)
+cfg.runner = dict(type='EpochBasedRunner', max_epochs=2)
 cfg.checkpoint_config = dict(interval=10)
 
 # Change the evaluation metric since we use customized dataset.
 cfg.evaluation.metric = "bbox"
-# We can set the evaluation interval to reduce the evalueation times
+# We can set the evaluation interval to reduce the evaluation times
 cfg.evaluation.interval = 3
 # We can set the checkpoint saving interval to reduce the storage cost
 cfg.checkpoint_config.interval = 3

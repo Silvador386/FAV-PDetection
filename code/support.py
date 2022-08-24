@@ -112,35 +112,35 @@ def convert_dataset(ann_path, video_path, current_name, output_folder, image_fol
         ann_line = ann_line.split(",")
         frame_idx = int(ann_line[0])  # current frame
         if frame_idx % frame_rate == 0:
+            image_id = int(current_name.replace("-", "").replace("2019", "") + "0" + str(frame_idx))
+            id = int(current_name.replace("-", "").replace("2019", "") + str(i))
             if frame_idx > previous:  # new frame in annotations -> create corresponding jpg
-                img_file_name = image_folder + "/" + current_name + f"_f{frame_idx:05}.jpg"
+                img_name = current_name + f"_f{frame_idx:05}.jpg"
+                img_file_name = image_folder + "/" + img_name
 
                 # Checks if the image already exists
-                if os.path.isfile(img_file_name):
-                    continue
-
-                # Convert the image
-                while img_idx < frame_idx:
-                    success, image = vidcap.read()
-                    if not success:
-                        print("vidcap.read() not successful!")
-                    img_idx += 1
-                    if img_idx == frame_idx:
-                        cv2.imwrite(img_file_name, image)  # save frame as JPEG file
+                if not os.path.isfile(img_file_name):
+                    # Convert the image
+                    while img_idx < frame_idx:
+                        success, image = vidcap.read()
+                        if not success:
+                            print("vidcap.read() not successful!")
+                        img_idx += 1
+                        if img_idx == frame_idx:
+                            cv2.imwrite(img_file_name, image)  # save frame as JPEG file
 
                 # store the image info
                 image = mmcv.imread(img_file_name)
                 width, height = image.shape[:2]
-                image_info = dict(file_name=img_file_name, width=width, height=height, id=frame_idx)
+                image_info = dict(file_name=img_name, width=width, height=height, id=image_id)
                 final["images"].append(image_info)
                 previous = frame_idx
 
             # store annotation
             bbox = [float(val) for val in ann_line[2:6]]
             area = bbox[2] * bbox[3]
-            id = int(current_name.replace("-", "").replace("2019", "") + str(i))
             # TODO check if the empty params have any effect on model
-            ann_info = dict(image_id=frame_idx, bbox=bbox, category_id=0, id=id,
+            ann_info = dict(image_id=image_id, bbox=bbox, category_id=0, id=id,
                             area=area, iscrowd=0)
             final["annotations"].append(ann_info)
 
@@ -158,6 +158,7 @@ def merge_json_files(json_folder, name, out_folder):
     result = {}
     # Checks if the file already exists
     if os.path.isfile(out_path):
+        print(f"{out_path} already exists.")
         return
 
     for file in files:
@@ -165,9 +166,9 @@ def merge_json_files(json_folder, name, out_folder):
             with open(json_folder + "/" + file, "r") as reader:
                 current = json.load(reader)
                 if len(list(result.keys())) == 0:
-                    for key in list(current.keys())[:-1]:
+                    for key in list(current.keys()):
                         result[key] = []
-                # for unique values
+                # for unique values (image, annotations)
                 for var in list(current.keys())[:-1]:
                     result[var].extend(current[var])
                 # for same values (categories)
