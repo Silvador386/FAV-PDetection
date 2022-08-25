@@ -91,11 +91,11 @@ def convert_pdestre_dataset(new_annotations_folder, new_video_folder, convert_an
             print(f"{likely_ann_path} already exists.")
             continue
         # Converts an annotation file with corresponding video.
-        convert_dataset(ann_path, video_path, name, convert_annotations_folder, convert_image_folder, frame_rate=frame_rate)
+        convert_pdestre_dataset(ann_path, video_path, name, convert_annotations_folder, convert_image_folder, frame_rate=frame_rate)
 
-        # TODO test - one file only
-        if i == 30:
-            break
+        # # TODO test - one file only
+        # if i == 30:
+        #     break
 
 
 def prepare_data():
@@ -117,11 +117,11 @@ def train():
 
     train_detector(model, datasets, cfg, distributed=False, validate=True)
 
-    img = mmcv.imread("../Datasets/P-DESTRE/coco_format/videos/08-11-2019-1-1_f00010.jpg")
-
-    model.cfg = cfg
-    result = inference_detector(model, img)
-    show_result_pyplot(model, img, result)
+    # img = mmcv.imread("../Datasets/P-DESTRE/coco_format/videos/08-11-2019-1-1_f00010.jpg")
+    #
+    # model.cfg = cfg
+    # result = inference_detector(model, img)
+    # show_result_pyplot(model, img, result)
 
 
 def test():
@@ -134,17 +134,21 @@ def test():
     # out_prefix = "../results/control"
 
     # Testing image
-    image_rate = 10
     config_file = cfg
-    checkpoint_file = './train_exports/latest.pth'
+    checkpoint_file = "../checkpoints/results/all_1e_old_optimizer/latest.pth"
     out_prefix = "../results/pdestre"
-    model = init_detector(config_file, checkpoint_file, device='cuda:0')
 
+    model = init_detector(config_file, checkpoint_file, device='cuda:0')
     test_img_prefix = "../Datasets/city/images"
 
     image_names = files_in_folder(test_img_prefix)
 
+    finer_zones = [(200, 300), ]
+
     for i, image_name in enumerate(image_names):
+        image_rate = 10
+        if all([zone[0] < i < zone[1] for zone in finer_zones]):
+            image_rate = 4
         if i % image_rate == 0:
             img = mmcv.imread(test_img_prefix + "/" + image_name)
             result = inference_detector(model, img)
@@ -155,6 +159,6 @@ def test():
 if __name__ == "__main__":
     # convert_video_to_jpg("video_20220603-1218", "../Datasets/city/video_20220603-1218.mp4", "../Datasets/city/images")
     # prepare_data()
-    # train()
+    train()
     test()
 

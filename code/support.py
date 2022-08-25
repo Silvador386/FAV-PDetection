@@ -79,10 +79,11 @@ def convert_pdestre_to_coco(ann_path, current_name, output_folder, image_folder)
         outfile.write(json_out)
 
 
-def convert_dataset(ann_path, video_path, current_name, output_folder, image_folder, frame_rate=10):
+def convert_pdestre_dataset(ann_path, video_path, current_name, output_folder, image_folder, frame_rate=10):
     """
-    1. Take annotations at ann_path, take video at video_path
-    2. Read annotation and for specific frame (each 10th), create specific frame jpg from video and move to the next.
+    1. Take annotations at ann_path, take video at video_path,
+    2. Checks if already present if so, skips the step.
+    3. Read annotation and for specific frame (each 10th), create specific frame jpg from video and move to the next.
     """
     out_path = output_folder + "/" + current_name + ".json"
     # check if annotation already exists
@@ -120,13 +121,18 @@ def convert_dataset(ann_path, video_path, current_name, output_folder, image_fol
                 # Checks if the image already exists
                 if not os.path.isfile(img_file_name):
                     # Convert the image
+                    skip = False  # skips the unsuccessful read
                     while img_idx < frame_idx:
                         success, image = vidcap.read()
                         if not success:
                             print("vidcap.read() not successful!")
+                            skip = True
+                            break
                         img_idx += 1
                         if img_idx == frame_idx:
                             cv2.imwrite(img_file_name, image)  # save frame as JPEG file
+                    if skip:
+                        continue
 
                 # store the image info
                 image = mmcv.imread(img_file_name)
