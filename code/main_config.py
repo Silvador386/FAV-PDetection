@@ -5,7 +5,7 @@ from mmdet.apis import set_random_seed
 cfg = Config.fromfile("../configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py")
 
 _data_root = '../Datasets/P-DESTRE/coco_format/'
-_ann_file = "large/pdestre_large.json"
+_ann_file = "large/pdestre_small.json"
 _img_prefix = "videos/"
 
 # cfg.fp16 = dict(loss_scale_512.)
@@ -56,9 +56,9 @@ cfg.work_dir = "./train_exports"
 #     warmup_ratio=0.001,
 #     step=[7])
 
-# cfg.optimizer.lr = 0.02 / 8
-# cfg.lr_config.warmup = None
-# cfg.log_config.interval = 50
+cfg.optimizer.lr = 0.02 / 8
+cfg.lr_config.warmup = None
+cfg.log_config.interval = 50
 
 cfg.runner = dict(type='EpochBasedRunner', max_epochs=1)
 cfg.checkpoint_config = dict(interval=50)

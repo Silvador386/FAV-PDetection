@@ -99,10 +99,20 @@ def convert_pdestre_dataset(new_annotations_folder, new_video_folder, convert_an
 
 
 def prepare_data():
+    print("\nConverting...\n")
     convert_pdestre_dataset(NEW_ANNOTATIONS_FOLDER, NEW_VIDEO_FOLDER,
                             CONVERTED_ANNOTATIONS_FOLDER, CONVERTED_IMAGE_FOLDER, frame_rate=20)
 
-    merge_json_files(CONVERTED_ANNOTATIONS_FOLDER, "pdestre_large", "../Datasets/P-DESTRE/coco_format/large")
+    print("\nMerging...\n")
+    # Create pdestre_large
+    train_files, test_files = select_json_to_merge(CONVERTED_ANNOTATIONS_FOLDER, 100, shuffle=False, divide=False)
+    merge_json_files(CONVERTED_ANNOTATIONS_FOLDER, train_files,
+                     "pdestre_large", "../Datasets/P-DESTRE/coco_format/large")
+
+    # Create pdestre_small
+    train_files, test_files = select_json_to_merge(CONVERTED_ANNOTATIONS_FOLDER, 16, shuffle=True, divide=False)
+    merge_json_files(CONVERTED_ANNOTATIONS_FOLDER, train_files,
+                     "pdestre_small", "../Datasets/P-DESTRE/coco_format/large")
 
 
 def train():
@@ -143,11 +153,11 @@ def test():
 
     image_names = files_in_folder(test_img_prefix)
 
-    finer_zones = [(200, 300), ]
+    finer_zones = [(200, 300), (1400, 1450)]
 
     for i, image_name in enumerate(image_names):
         image_rate = 10
-        if all([zone[0] < i < zone[1] for zone in finer_zones]):
+        if any([zone[0] < i < zone[1] for zone in finer_zones]):
             image_rate = 4
         if i % image_rate == 0:
             img = mmcv.imread(test_img_prefix + "/" + image_name)
@@ -159,6 +169,6 @@ def test():
 if __name__ == "__main__":
     # convert_video_to_jpg("video_20220603-1218", "../Datasets/city/video_20220603-1218.mp4", "../Datasets/city/images")
     # prepare_data()
-    train()
+    # train()
     test()
 

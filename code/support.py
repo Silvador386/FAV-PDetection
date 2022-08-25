@@ -2,7 +2,7 @@ import os
 import cv2
 import json
 import mmcv
-
+import random as r
 
 # Return file names of content in the folder
 def files_in_folder(path):
@@ -156,9 +156,38 @@ def convert_pdestre_dataset(ann_path, video_path, current_name, output_folder, i
         outfile.write(json_out)
 
 
-# Merges all json files in the folder to a new json file.
-def merge_json_files(json_folder, name, out_folder):
+def select_json_to_merge(json_folder, num_files=10, shuffle=False, divide=False):
+    """
+    1. Takes in a folder with .json annotations.
+    2. Selects files to be merged.
+    3. Returns tuple (train_filenames, test_filenames)
+       * divide=False: test_filenames = []
+       * divide=True:  test_filenames = [one 10th of num_files, at least 1]
+    """
+    train_filenames, test_filenames = [], []
     files = files_in_folder(json_folder)
+
+    if 5 > num_files or num_files > len(files):
+        print(f"Number of files changed to maximum ({len(files)}).")
+        num_files = len(files)
+
+    for i in range(num_files):
+        if not shuffle:
+            file = files.pop()
+        else:
+            file = r.choice(files)
+            files.remove(file)
+
+        if divide and i < num_files / 10:
+            test_filenames.append(file)
+        else:
+            train_filenames.append(file)
+
+    return train_filenames, test_filenames
+
+
+# Merges all given json files to a new json file.
+def merge_json_files(json_folder, json_files, name, out_folder):
     out_path = out_folder + "/" + name + ".json"
     result = {}
     # Checks if the file already exists
@@ -166,7 +195,7 @@ def merge_json_files(json_folder, name, out_folder):
         print(f"{out_path} already exists.")
         return
 
-    for file in files:
+    for file in json_files:
         if file.endswith(".json") and file != name + ".json":
             with open(json_folder + "/" + file, "r") as reader:
                 current = json.load(reader)
