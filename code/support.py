@@ -79,7 +79,8 @@ def convert_pdestre_to_coco(ann_path, current_name, output_folder, image_folder)
         outfile.write(json_out)
 
 
-def convert_pdestre_dataset(ann_path, video_path, current_name, output_folder, image_folder, frame_rate=10):
+def convert_pdestre_dataset(ann_path, video_path, current_name, output_folder, image_folder, frame_rate=10,
+                            overwrite=False):
     """
     1. Take annotations at ann_path, take video at video_path,
     2. Checks if already present if so, skips the step.
@@ -87,7 +88,7 @@ def convert_pdestre_dataset(ann_path, video_path, current_name, output_folder, i
     """
     out_path = output_folder + "/" + current_name + ".json"
     # check if annotation already exists
-    if os.path.isfile(out_path):
+    if os.path.isfile(out_path) and not overwrite:
         return
     # load video
     print(f"Converting video from: {video_path}")
@@ -187,11 +188,11 @@ def select_json_to_merge(json_folder, num_files=10, shuffle=False, divide=False)
 
 
 # Merges all given json files to a new json file.
-def merge_json_files(json_folder, json_files, name, out_folder):
+def merge_json_files(json_folder, json_files, name, out_folder, overwrite=False):
     out_path = out_folder + "/" + name + ".json"
     result = {}
     # Checks if the file already exists
-    if os.path.isfile(out_path):
+    if os.path.isfile(out_path) and not overwrite:
         print(f"{out_path} already exists.")
         return
 

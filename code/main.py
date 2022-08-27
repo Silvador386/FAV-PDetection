@@ -1,49 +1,12 @@
+import random
+
 from mmdet.apis import init_detector, train_detector, inference_detector, show_result_pyplot
 from support import *
 from settings import *
 
 
-def start_demo():
-    # Check Pytorch installation
-    import torch
-
-    print(torch.__version__, torch.cuda.is_available())
-
-    # Check MMDetection installation
-    import mmdet
-
-    print(mmdet.__version__)
-
-    # Check mmcv installation
-    from mmcv.ops import get_compiling_cuda_version, get_compiler_version
-
-    print(get_compiling_cuda_version())
-    print(get_compiler_version())
-
-    # Specify the path to model config and checkpoint file
-    config_file = '../configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py'
-    checkpoint_file = '../checkpoints/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth'
-
-    # build the model from a config file and a checkpoint file
-    model = init_detector(config_file, checkpoint_file, device='cuda:0')
-
-    # test a single image and show the results
-    img = "demo/demo.jpg"  # or img = mmcv.imread(img), which will only load it once
-    result = inference_detector(model, img)
-    # visualize the results in a new window
-    model.show_result(img, result)
-    # or save the visualization results to image files
-    model.show_result(img, result, out_file='demo/test0.jpg')
-
-    # test a video and show the results
-    video = mmcv.VideoReader("demo/demo.mp4")
-    for frame in video:
-        result = inference_detector(model, frame)
-        model.show_result(frame, result, wait_time=1, out_file="demo/test1.jpg")
-
-
 # checks for paired annotation and video names
-def check_pdestre_dataset(new_annotations_folder, new_video_folder):
+def check_pairs(new_annotations_folder, new_video_folder):
     annotation_names = files_in_folder(NEW_ANNOTATIONS_FOLDER)
     video_names = files_in_folder(NEW_VIDEO_FOLDER)
 
@@ -70,7 +33,7 @@ def check_pdestre_dataset(new_annotations_folder, new_video_folder):
 def convert_pdestre_dataset(new_annotations_folder, new_video_folder, convert_annotations_folder, convert_image_folder,
                             frame_rate, override_checks=False):
 
-    names_paired = check_pdestre_dataset(new_annotations_folder, new_video_folder)
+    names_paired = check_pairs(new_annotations_folder, new_video_folder)
 
     # take each pair, convert video to jpgs, create new COCO-style annotation
     for i, name in enumerate(names_paired):
@@ -78,24 +41,16 @@ def convert_pdestre_dataset(new_annotations_folder, new_video_folder, convert_an
         ann_path = new_annotations_folder + "/" + name + NEW_ANNOTATION_TYPE
 
         # test if already converted
-        likely_image_path = convert_image_folder + "/" + name + "_f00000.jpg"
         likely_ann_path = convert_annotations_folder + "/" + name + ".json"
-
-        # if not os.path.isfile(likely_image_path):
-        #     convert_video_to_jpg(name, video_path, convert_image_folder)
-        # if not os.path.isfile(likely_ann_path):
-        #     convert_pdestre_to_coco(ann_path, name, convert_annotations_folder, convert_image_folder)
 
         # Checks if the annotation file already exists. If so, skips the conversion.
         if os.path.isfile(likely_ann_path) and not override_checks:
             print(f"{likely_ann_path} already exists.")
             continue
-        # Converts an annotation file with corresponding video.
-        convert_pdestre_dataset(ann_path, video_path, name, convert_annotations_folder, convert_image_folder, frame_rate=frame_rate)
 
-        # # TODO test - one file only
-        # if i == 30:
-        #     break
+        # Converts an annotation file with corresponding video.
+        convert_pdestre_dataset(ann_path, video_path, name, convert_annotations_folder, convert_image_folder,
+                                frame_rate=frame_rate)
 
 
 def prepare_data():
@@ -105,33 +60,42 @@ def prepare_data():
 
     print("\nMerging...\n")
     # Create pdestre_large
-    train_files, test_files = select_json_to_merge(CONVERTED_ANNOTATIONS_FOLDER, 100, shuffle=False, divide=False)
+    train_files, test_files = select_json_to_merge(CONVERTED_ANNOTATIONS_FOLDER, 75, shuffle=True, divide=True)
     merge_json_files(CONVERTED_ANNOTATIONS_FOLDER, train_files,
-                     "pdestre_large", "../Datasets/P-DESTRE/coco_format/large")
+                     "large_train", "../Datasets/P-DESTRE/coco_format/merged", overwrite=True)
+    merge_json_files(CONVERTED_ANNOTATIONS_FOLDER, test_files,
+                     "large_test", "../Datasets/P-DESTRE/coco_format/merged", overwrite=True)
 
     # Create pdestre_small
-    train_files, test_files = select_json_to_merge(CONVERTED_ANNOTATIONS_FOLDER, 16, shuffle=True, divide=False)
+    train_files, test_files = select_json_to_merge(CONVERTED_ANNOTATIONS_FOLDER, 32, shuffle=True, divide=True)
     merge_json_files(CONVERTED_ANNOTATIONS_FOLDER, train_files,
-                     "pdestre_small", "../Datasets/P-DESTRE/coco_format/large")
+                     "small_train", "../Datasets/P-DESTRE/coco_format/merged", overwrite=True)
+    merge_json_files(CONVERTED_ANNOTATIONS_FOLDER, test_files,
+                     "small_test", "../Datasets/P-DESTRE/coco_format/merged", overwrite=True)
 
 
-def train():
+def train(learning_rates=None):
     from main_config import cfg
     from mmdet.datasets import build_dataset
     from mmdet.models import build_detector
 
     datasets = [build_dataset(cfg.data.train)]  # mmdet/datasets/ utils.py - change __check_head
 
-    model = build_detector(cfg.model, train_cfg=cfg.get('train_cfg'), test_cfg=cfg.get('test_cfg'))
-    model.CLASSES = ("person", )
+    if not learning_rates:
+        # learning_rates = [random.uniform(0.0004, 0.00001) for _ in range(3)]
+        # learning_rates = [0.0004, 0.00005]
+        learning_rates = [0.00016]
 
-    train_detector(model, datasets, cfg, distributed=False, validate=True)
+    for i, learning_rate in enumerate(learning_rates):
+        print(f"Learning rate: {learning_rate}")
+        # cfg.load_from = "../checkpoints/results/favorites/s32_e2_lr_1,3e4/latest.pth"
+        cfg.optimizer = dict(type='SGD', lr=learning_rate, momentum=0.9, weight_decay=0.0001)
+        cfg.work_dir = f"./train_exports"
 
-    # img = mmcv.imread("../Datasets/P-DESTRE/coco_format/videos/08-11-2019-1-1_f00010.jpg")
-    #
-    # model.cfg = cfg
-    # result = inference_detector(model, img)
-    # show_result_pyplot(model, img, result)
+        model = build_detector(cfg.model, train_cfg=cfg.get('train_cfg'), test_cfg=cfg.get('test_cfg'))
+        model.CLASSES = ("person", )
+
+        train_detector(model, datasets, cfg, distributed=False, validate=True)
 
 
 def test():
@@ -145,7 +109,7 @@ def test():
 
     # Testing image
     config_file = cfg
-    checkpoint_file = "../checkpoints/results/all_1e_old_optimizer/latest.pth"
+    checkpoint_file = "../checkpoints/results/favorites/s32_e2_lr_1,6e4/latest.pth"
     out_prefix = "../results/pdestre"
 
     model = init_detector(config_file, checkpoint_file, device='cuda:0')
@@ -153,10 +117,10 @@ def test():
 
     image_names = files_in_folder(test_img_prefix)
 
-    finer_zones = [(200, 300), (1400, 1450)]
+    finer_zones = [(200, 300), (1400, 1480)]
 
     for i, image_name in enumerate(image_names):
-        image_rate = 10
+        image_rate = 20
         if any([zone[0] < i < zone[1] for zone in finer_zones]):
             image_rate = 4
         if i % image_rate == 0:
@@ -164,6 +128,19 @@ def test():
             result = inference_detector(model, img)
             # show_result_pyplot(model, img, result)
             model.show_result(img, result, out_file=out_prefix + f"/{i:05}.jpg")
+
+    pdestre_examples = [CONVERTED_IMAGE_FOLDER + "/12-11-2019-2-1_f00160.jpg",
+                        CONVERTED_IMAGE_FOLDER + "/13-11-2019-1-2_f01560.jpg",
+                        CONVERTED_IMAGE_FOLDER + "/10-07-2019-1-1_f00670.jpg",
+                        CONVERTED_IMAGE_FOLDER + "/18-07-2019-1-2_f00280.jpg",
+                        CONVERTED_IMAGE_FOLDER + "/08-11-2019-2-1_f00360.jpg",
+                        CONVERTED_IMAGE_FOLDER + "/08-11-2019-1-2_f01090.jpg"
+                        ]
+
+    for e in pdestre_examples:
+        img = mmcv.imread(e)
+        result = inference_detector(model, img)
+        show_result_pyplot(model, img, result)
 
 
 if __name__ == "__main__":
