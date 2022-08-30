@@ -170,5 +170,9 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    # main()
+    import plot_logs
+
+    plot_logs.plot_log("train_exports/all_lr1.6e-04_wd5.8e-03.json", "")
+
 
