@@ -1,6 +1,8 @@
 from mmcv import Config
 from mmdet.apis import set_random_seed
 
+"""     Configuration of the train model     """
+
 
 cfg = Config.fromfile("../configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py")
 

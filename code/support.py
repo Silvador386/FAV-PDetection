@@ -7,23 +7,37 @@ import random
 
 def files_in_folder(path):
     """
-    Return file names of content in the folder
+    Return file names of content in the folder.
+
+    Args:
+        path (str): A path to the selected folder.
+
+    Returns:
+        file_names (list): A list of file names.
     """
+
     file_names = []
     for _, __, f_names in os.walk(path):
         for file_name in f_names:
             file_names.append(file_name)
+        break
     return file_names
 
 
 def convert_video_to_jpg(video_name, video_path, output_path, frame_rate=10):
     """
-    Converts video from video_path to jpgs
+    Converts video from video_path to jpg images and stores the in the output_path.
     Jpg file convention:
         output_path/video_name'_f%05d.jpg'
 
-    Frame rate declares frames should be converted e.g. frame_rate=10 -> each 10. frame will be converted to jpg.
+    Args:
+        video_name (str): A name of the file (video) to be converted.
+        video_path (str): A path to the location where the file (video_name) is located.
+        output_path (str): A path to the location where the images will be stored.
+        frame_rate (int): Frame rate declares frames should be converted
+                          e.g. frame_rate=10 -> each 10. frame will be converted to jpg.
     """
+
     print(f"Converting video from: {video_path}")
     vidcap = cv2.VideoCapture(video_path)
     success, image = vidcap.read()
@@ -38,11 +52,17 @@ def convert_video_to_jpg(video_name, video_path, output_path, frame_rate=10):
 
 def pdestre_to_coco(ann_path, video_path, current_name, output_folder, image_folder, frame_rate=10):
     """
-    1. Take annotations at ann_path, take video at video_path,
-    2. Checks if already present if so, skips the step.
-    3. Read annotation and for specific frame (each 10th), create specific frame jpg from video and move to the next.
+    Takes annotations at the ann_path, takes video at the video_path. Reads the annotation and for the specific frame
+    it creates a jpg image from video which is then stored at the image_folder.
 
-    Frame rate declares frames should be converted aka frame_rate=10 -> each 10. frame will be converted to jpg.
+    Args:
+        ann_path (str): A path to the annotation.
+        video_path (str): A path the the video.
+        current_name (str): The name of the file (must be same for the annotation and the video).
+        output_folder (str): A path to the folder where the formatted annotation will be stored.
+        image_folder (str): A path to the folder where the images will be stored.
+        frame_rate (int): Frame rate declares frames should be converted
+                          e.g. frame_rate=10 -> each 10. frame will be converted to jpg.
     """
 
     out_path = output_folder + "/" + current_name + ".json"
@@ -117,12 +137,19 @@ def pdestre_to_coco(ann_path, video_path, current_name, output_folder, image_fol
 
 def select_json_to_merge(json_folder, num_files=10, shuffle=False, divide=False):
     """
-    1. Takes in a folder with .json annotations.
-    2. Selects files to be merged.
-    3. Returns tuple (train_filenames, test_filenames)
-       * divide=False: test_filenames = []
-       * divide=True:  test_filenames = [one 10th of num_files, at least 1]
+    Takes in a folder with .json annotations. Selects files to be merged and returns tuple of train and test
+    file names in the ration of 10:1.
+
+    Args:
+        json_folder (str): A path of the folder.
+        num_files (int): The total number of files from which to pick.
+        shuffle (bool): If the order of files should be shuffled.
+        divide (bool): If false only train files will be picked.
+
+    Return:
+        (train_filenames, test_filenames): tuple of lists of file names.
     """
+
     train_filenames, test_filenames = [], []
     files = files_in_folder(json_folder)
 
@@ -145,11 +172,19 @@ def select_json_to_merge(json_folder, num_files=10, shuffle=False, divide=False)
     return train_filenames, test_filenames
 
 
-def merge_json_files(json_folder, json_files, name, out_folder, overwrite=False):
+def merge_json_files(json_folder, json_files, name, output_folder, overwrite=False):
     """
-    Merges all given json files in json_folder to a new json file.
+    Merges all given json files in json_folder to a new json file that is stored in output_folder under the new name.
+
+    Args:
+        json_folder (str): A path of the folder.
+        json_files (list): A list of selected files to be merged in to a single .json file.
+        name (str): A name of the new file.
+        output_folder (str): A path to the folder where the formatted annotation will be stored.
+        overwrite (bool): Overwrites any pre-existent merged file.
+
     """
-    out_path = out_folder + "/" + name + ".json"
+    out_path = output_folder + "/" + name + ".json"
     result = {}
     # Checks if the file already exists
     if os.path.isfile(out_path) and not overwrite:

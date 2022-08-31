@@ -4,6 +4,14 @@ import matplotlib.pyplot as plt
 
 
 def load_logs(log_file):
+    """
+    Processes data from log.
+    Args:
+        log_file (str): A path of the log file.
+    Returns:
+        train (list): A list of dictionaries with train data.
+        val (list): A list of dictionaries with validation data.
+    """
     train, val = [], []
     with open(log_file, "r") as logs:
         for line in logs:
@@ -17,6 +25,15 @@ def load_logs(log_file):
 
 
 def create_plot(train_logs, val_logs, title, out):
+    """
+    Plots the data, contains two graphs, first for train loss, second for mAP.
+    Args:
+        train_logs (list): A list of dictionaries of training data.
+        val_logs (list): A list of dictionaries of validation data.
+        title (str): A title of the plot.
+        out (str): A path where the plot should be stored, may be None.
+
+    """
     num_iter = max(train_log["iter"] for train_log in train_logs)
     num_epochs = max(train_log["epoch"] for train_log in train_logs)
     lr = train_logs[-1]["lr"]
@@ -69,6 +86,15 @@ def create_plot(train_logs, val_logs, title, out):
 
 
 def plot_log(log_file, title=None, out_file=None):
+    """
+    Plots data from the log of the mmdetection format.
+    Args:
+        log_file (str): A name of the log file with data.
+        title (str): A title of the plot.
+        out_file (str): A path of the plotted data (must end with .png etc.).
+
+    """
+
     train_logs, val_logs = load_logs(log_file)
     if title is None:
         title = log_file.split("/")[-1].removesuffix(".json")
@@ -76,6 +102,13 @@ def plot_log(log_file, title=None, out_file=None):
 
 
 def plot_all_logs_in_dir(work_dir, recursive=False):
+    """
+    Goes trough the whole dir and plots data of every located log file in mmdetection format.
+
+    Args:
+        work_dir (str): A path of the directory.
+        recursive (bool): If any located subdirectory should be searched for logs as well.
+    """
     for dir_path, dir_names, file_names in os.walk(work_dir):
         for file_name in file_names:
             if file_name.endswith(".json"):

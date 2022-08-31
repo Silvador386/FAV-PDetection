@@ -11,7 +11,14 @@ from mmdet.models import build_detector
 
 def check_pairs(new_annotations_folder, new_video_folder):
     """
-    Checks for paired annotation and video names
+    Checks for paired annotation and video names.
+
+    Args:
+        new_annotations_folder (str): A path to the folder with annotations.
+        new_video_folder (str): A path to folder with videos.
+
+    Returns:
+         names_paired: A list of strings (names of files that are paired).
     """
 
     annotation_names = files_in_folder(new_annotations_folder)
@@ -39,7 +46,16 @@ def check_pairs(new_annotations_folder, new_video_folder):
 def convert_pdestre_dataset(new_annotations_folder, new_video_folder, convert_annotations_folder, convert_image_folder,
                             frame_rate, override_checks=False):
     """
-    Converts paired videos to jpg images and annotations to coco format json files
+    Converts paired videos to jpg images and annotations to coco format json files.
+
+    Args:
+        new_annotations_folder (str): A path to the folder with annotations.
+        new_video_folder (str): A path to folder with videos.
+        convert_annotations_folder (str): A path to the folder for formatted annotations.
+        convert_image_folder (str): A path to the folder for images got from the video.
+        frame_rate (int): Determines which frames should be converted (each 10th for instance).
+        override_checks (bool): Overrides checks if annotations are already present.
+
     """
 
     names_paired = check_pairs(new_annotations_folder, new_video_folder)
@@ -63,6 +79,10 @@ def convert_pdestre_dataset(new_annotations_folder, new_video_folder, convert_an
 
 
 def prepare_data():
+    """
+    Converts P-DESTRE dataset by converting videos to images, text annotations to coco formatted .json files.
+    Then the annotations are merged into large and small variant of train and test datasets.
+    """
     print("\nConverting...\n")
     # Converts every video to images and every annotation to coco format .json file
     convert_pdestre_dataset(NEW_ANNOTATIONS_FOLDER, NEW_VIDEO_FOLDER,
@@ -85,6 +105,16 @@ def prepare_data():
 
 
 def train(create_params=False):
+    """
+    Retrains an pre-existed object detection model and outputs the checkpoints and logs into "train_exports" directory.
+    Builds a train dataset from cfg.data.train. Plots the train loss of train epochs and mAP of the validation epochs.
+
+    Args:
+        create_params (bool): Creates a combination of multiple params which are used to gradually
+                              multiple models.
+
+    Results are stored in train_exports directory.
+    """
 
     datasets = [build_dataset(cfg.data.train)]  # mmdet/datasets/ utils.py - change __check_head
 
@@ -119,7 +149,9 @@ def train(create_params=False):
 
 def test():
     """
-    Test current model on the control data
+    Tests current model on the control data (images of pre-selected video and randomly chose images from the dataset).
+    The interference is stored in the "out_prefix" folder.
+
     """
 
     # Control - original model
@@ -137,6 +169,7 @@ def test():
 
     image_names = files_in_folder(test_img_prefix)
 
+    # For parts where the tram is present.
     finer_zones = [(200, 300), (1400, 1480)]
 
     # Test on images
