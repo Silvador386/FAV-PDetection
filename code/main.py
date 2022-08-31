@@ -1,5 +1,6 @@
 import itertools
 import random
+import plot_logs
 from mmdet.apis import init_detector, train_detector, inference_detector, show_result_pyplot
 from support import *
 from settings import *
@@ -113,6 +114,7 @@ def train(create_params=False):
         model.CLASSES = ("person", )
 
         train_detector(model, datasets, cfg, distributed=False, validate=True)
+        plot_logs.plot_all_logs_in_dir("train_exports", recursive=False)
 
 
 def test():
@@ -127,7 +129,7 @@ def test():
 
     # Test current model
     config_file = cfg
-    checkpoint_file = "train_exports/epoch_2.pth"
+    checkpoint_file = "train_exports/latest.pth"
     out_prefix = "../results/pdestre"
 
     model = init_detector(config_file, checkpoint_file, device='cuda:0')
@@ -170,9 +172,4 @@ def main():
 
 
 if __name__ == "__main__":
-    # main()
-    import plot_logs
-
-    plot_logs.plot_log("train_exports/all_lr1.6e-04_wd5.8e-03.json", "")
-
-
+    main()
