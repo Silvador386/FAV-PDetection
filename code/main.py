@@ -1,10 +1,10 @@
 import itertools
 import random
 import plot_logs
+import sanity_checks
 from mmdet.apis import init_detector, train_detector, inference_detector, show_result_pyplot
-from support import *
+from pdestre_conversion import *
 from settings import *
-from main_config import cfg
 from mmdet.datasets import build_dataset
 from mmdet.models import build_detector
 
@@ -80,7 +80,7 @@ def convert_pdestre_dataset(new_annotations_folder, new_video_folder, convert_an
 
 def prepare_data():
     """
-    Converts P-DESTRE dataset by converting videos to images, text annotations to coco formatted .json files.
+    Converts P-DESTRE dataset by converting videos to images and text annotations to coco formatted .json files.
     Then the annotations are merged into large and small variant of train and test datasets.
     """
     print("\nConverting...\n")
@@ -92,16 +92,16 @@ def prepare_data():
     # Create pdestre_large
     train_files, test_files = select_json_to_merge(CONVERTED_ANNOTATIONS_FOLDER, 75, shuffle=True, divide=True)
     merge_json_files(CONVERTED_ANNOTATIONS_FOLDER, train_files,
-                     "large_train", "../Datasets/P-DESTRE/coco_format/merged", overwrite=True)
+                     "large_train", "../data/P-DESTRE/coco_format/merged", overwrite=False)
     merge_json_files(CONVERTED_ANNOTATIONS_FOLDER, test_files,
-                     "large_test", "../Datasets/P-DESTRE/coco_format/merged", overwrite=True)
+                     "large_test", "../data/P-DESTRE/coco_format/merged", overwrite=False)
 
     # Create pdestre_small
     train_files, test_files = select_json_to_merge(CONVERTED_ANNOTATIONS_FOLDER, 16, shuffle=True, divide=True)
     merge_json_files(CONVERTED_ANNOTATIONS_FOLDER, train_files,
-                     "small_train", "../Datasets/P-DESTRE/coco_format/merged", overwrite=True)
+                     "small_train", "../data/P-DESTRE/coco_format/merged", overwrite=True)
     merge_json_files(CONVERTED_ANNOTATIONS_FOLDER, test_files,
-                     "small_test", "../Datasets/P-DESTRE/coco_format/merged", overwrite=True)
+                     "small_test", "../data/P-DESTRE/coco_format/merged", overwrite=True)
 
 
 def train(create_params=False):
@@ -115,12 +115,13 @@ def train(create_params=False):
 
     Results are stored in train_exports directory.
     """
+    from main_config import cfg
 
     datasets = [build_dataset(cfg.data.train)]  # mmdet/datasets/ utils.py - change __check_head
 
     learning_rates = [0.00016]
-    weight_decays = [5.8e-3]
-
+    # weight_decays = [5.8e-3]
+    weight_decays = [0]
     if create_params:
         learning_rates = [random.uniform(0.0004, 0.00001) for _ in range(3)]
         weight_decays = [random.uniform(0.01, 0.00001) for _ in range(6)]
@@ -130,8 +131,8 @@ def train(create_params=False):
     for i, (learning_rate, weight_decay) in enumerate(combinations):
         print(f"Learning rate: {learning_rate}\nWeight decay: {weight_decay}")
         # cfg.load_from = "../checkpoints/results/favorites/s32_e2_lr_1,3e4/latest.pth"
-        cfg.optimizer = dict(type='SGD', lr=learning_rate, momentum=0.9, weight_decay=weight_decay)
-        cfg.optimizer_config = dict(grad_clip=None)
+        # cfg.optimizer = dict(type='SGD', lr=learning_rate, momentum=0.9, weight_decay=weight_decay)
+        # cfg.optimizer_config = dict(grad_clip=None)
         # cfg.lr_config = dict(
         #     policy='step',
         #     warmup='linear',
@@ -154,25 +155,28 @@ def test():
 
     """
 
+    from main_config import cfg
+
     # Control - original model
     # config_file = '../configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py'
     # checkpoint_file = '../checkpoints/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth'
     # out_prefix = "../results/control"
 
     # Test current model
-    config_file = cfg
-    checkpoint_file = "train_exports/latest.pth"
+    # config_file = cfg
+    config_file = "../configs/my_config/main_config.py"
+    checkpoint_file = "../work_dirs/main_config/epoch_7.pth"
     out_prefix = "../results/pdestre"
 
     model = init_detector(config_file, checkpoint_file, device='cuda:0')
-    test_img_prefix = "../Datasets/city/images"
+    test_img_prefix = "../data/city/images"
 
     image_names = files_in_folder(test_img_prefix)
 
     # For parts where the tram is present.
     finer_zones = [(200, 300), (1400, 1480)]
 
-    # Test on images
+    # Test on images (images are each 10th frame of the video)
     for i, image_name in enumerate(image_names):
         image_rate = 20
         if any([zone[0] < i < zone[1] for zone in finer_zones]):
@@ -198,11 +202,21 @@ def test():
 
 
 def main():
-    # convert_video_to_jpg("video_20220603-1218", "../Datasets/city/video_20220603-1218.mp4", "../Datasets/city/images")
-    prepare_data()
-    train()
+    # convert_video_to_jpg("video_20220603-1218", "../data/city/video_20220603-1218.mp4", "../Datasets/city/images")
+    # prepare_data()
+    # train()
     test()
 
 
 if __name__ == "__main__":
-    main()
+    # sanity_checks.check_formatted_data("../data/P-DESTRE/coco_format/merged/mini_train.json", CONVERTED_IMAGE_FOLDER,
+    #                  "../results/test_check")
+    # sanity_checks.create_mini_dataset("../data/P-DESTRE/coco_format/merged/large_train.json",
+    #                                   "../data/P-DESTRE/coco_format/merged", 20)
+    # main()
+    # sanity_checks.test_image()
+
+    # python tools/train.py configs/my_config/main_config.py
+    # checkpoints/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth
+    # os.system("python ../tools/train.py ../configs/my_config/main_config.py")
+    os.system("python ../tools/test.py ../configs/my_config/main_config.py work_dirs/main_config/latest.pth --show")

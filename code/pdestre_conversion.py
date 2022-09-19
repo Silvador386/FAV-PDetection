@@ -1,5 +1,5 @@
 import os
-import cv2
+import cv2 as cv2
 import json
 import mmcv
 import random
@@ -105,7 +105,7 @@ def pdestre_to_coco(ann_path, video_path, current_name, output_folder, image_fol
                     while img_idx < frame_idx:  # iterates util the current frame is found
                         success, image = vidcap.read()
                         if not success:
-                            print("vidcap.read() not successful!")
+                            print(f"vidcap.read() not successful!\n Filename: {img_name}")
                             skip = True
                             break
                         img_idx += 1
@@ -206,5 +206,4 @@ def merge_json_files(json_folder, json_files, name, output_folder, overwrite=Fal
 
     with open(out_path, "w") as outfile:
         json.dump(result, outfile)
-
 

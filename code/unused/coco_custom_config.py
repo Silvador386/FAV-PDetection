@@ -2,8 +2,8 @@
 _base_ = "../configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py"
 
 # # 1. dataset settings
-# ann_file = "../Datasets/P-DESTRE/coco_format/annotations/08-11-2019-1-1.json"
-# img_prefix = "../Datasets/P-DESTRE/coco_format/videos/"
+# ann_file = "../data/P-DESTRE/coco_format/annotations/08-11-2019-1-1.json"
+# img_prefix = "../data/P-DESTRE/coco_format/videos/"
 # dataset_type = 'CocoDataset'
 # classes = ("person",)
 # num_classes = len(classes)

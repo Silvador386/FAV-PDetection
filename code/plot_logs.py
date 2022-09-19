@@ -43,7 +43,7 @@ def create_plot(train_logs, val_logs, title, out):
         x.append(log_dict["iter"] + log_dict["epoch"] * num_iter)
         y.append(log_dict["loss"])
 
-    val_names = ["bbox_mAP", "bbox_mAP_50", "bbox_mAP_75", "bbox_mAP_s", "bbox_mAP_m", "bbox_mAP_l"]
+    val_names = ["bbox_mAP", "bbox_mAP_50", "bbox_mAP_75", "bbox_mAP_m", "bbox_mAP_l"]
     x_val = []
     y_vals = {name: [] for name in val_names}
     for log_dict in val_logs:
@@ -65,7 +65,7 @@ def create_plot(train_logs, val_logs, title, out):
         axs[1].plot(x_val, y_vals[key], marker="o")
     axs[1].legend(y_vals.keys(), loc="lower right")
     axs[1].set(ylabel="mAP")
-    axs[1].set(xlabel="Epoch")
+    axs[1].set(xlabel="Epochs")
 
     text = "\n".join((f"Iter/Epoch: {num_iter}",
                       f"Learning r: {lr:.2e}"))
