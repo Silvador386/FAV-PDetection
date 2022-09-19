@@ -50,7 +50,7 @@ def create_mini_dataset(ann_file_path, output_path, num_imgs):
 
 
 def test_image():
-    from main_config import cfg
+    from org_config import cfg
     import mmcv
     from mmdet.apis import init_detector, inference_detector, show_result_pyplot
     from settings import CONVERTED_IMAGE_FOLDER

@@ -1,53 +1,10 @@
 import os
-import cv2 as cv2
+import cv2
 import json
 import mmcv
-import random
 
-
-def files_in_folder(path):
-    """
-    Return file names of content in the folder.
-
-    Args:
-        path (str): A path to the selected folder.
-
-    Returns:
-        file_names (list): A list of file names.
-    """
-
-    file_names = []
-    for _, __, f_names in os.walk(path):
-        for file_name in f_names:
-            file_names.append(file_name)
-        break
-    return file_names
-
-
-def convert_video_to_jpg(video_name, video_path, output_path, frame_rate=10):
-    """
-    Converts video from video_path to jpg images and stores the in the output_path.
-    Jpg file convention:
-        output_path/video_name'_f%05d.jpg'
-
-    Args:
-        video_name (str): A name of the file (video) to be converted.
-        video_path (str): A path to the location where the file (video_name) is located.
-        output_path (str): A path to the location where the images will be stored.
-        frame_rate (int): Frame rate declares frames should be converted
-                          e.g. frame_rate=10 -> each 10. frame will be converted to jpg.
-    """
-
-    print(f"Converting video from: {video_path}")
-    vidcap = cv2.VideoCapture(video_path)
-    success, image = vidcap.read()
-    count = 0
-    while success:
-        if count % frame_rate == 0:
-            cv2.imwrite(output_path + "/" + video_name + f"_f{count:05}.jpg", image)  # save frame as JPEG file
-        success, image = vidcap.read()
-        count += 1
-    print("Converting finished.")
+from settings import *
+from utils import files_in_folder
 
 
 def pdestre_to_coco(ann_path, video_path, current_name, output_folder, image_folder, frame_rate=10):
@@ -135,75 +92,70 @@ def pdestre_to_coco(ann_path, video_path, current_name, output_folder, image_fol
         outfile.write(json_out)
 
 
-def select_json_to_merge(json_folder, num_files=10, shuffle=False, divide=False):
+def check_pairs(new_annotations_folder, new_video_folder):
     """
-    Takes in a folder with .json annotations. Selects files to be merged and returns tuple of train and test
-    file names in the ration of 10:1.
+    Checks for paired annotation and video names.
 
     Args:
-        json_folder (str): A path of the folder.
-        num_files (int): The total number of files from which to pick.
-        shuffle (bool): If the order of files should be shuffled.
-        divide (bool): If false only train files will be picked.
+        new_annotations_folder (str): A path to the folder with annotations.
+        new_video_folder (str): A path to folder with videos.
 
-    Return:
-        (train_filenames, test_filenames): tuple of lists of file names.
+    Returns:
+         names_paired: A list of strings (names of files that are paired).
     """
 
-    train_filenames, test_filenames = [], []
-    files = files_in_folder(json_folder)
+    annotation_names = files_in_folder(new_annotations_folder)
+    video_names = files_in_folder(new_video_folder)
 
-    if 5 > num_files or num_files > len(files):
-        print(f"Number of files changed to maximum ({len(files)}).")
-        num_files = len(files)
+    # remove .type suffix
+    annotation_type = NEW_ANNOTATION_TYPE
+    video_type = NEW_VIDEO_TYPE
+    for i, ann in enumerate(annotation_names):
+        annotation_names[i] = ann.removesuffix(annotation_type)
+    for i, vid in enumerate(video_names):
+        video_names[i] = vid.removesuffix(video_type)
 
-    for i in range(num_files):
-        if not shuffle:
-            file = files.pop()
-        else:
-            file = random.choice(files)
-            files.remove(file)
+    # check paired names
+    names_paired = []
+    for annotation_name in annotation_names:
+        if annotation_name in video_names:
+            # remove wrong data pairs:
+            if not annotation_name.startswith("._"):
+                names_paired.append(annotation_name)
 
-        if divide and i < num_files / 10:  # Picks test data
-            test_filenames.append(file)
-        else:
-            train_filenames.append(file)
-
-    return train_filenames, test_filenames
+    return names_paired
 
 
-def merge_json_files(json_folder, json_files, name, output_folder, overwrite=False):
+def convert_pdestre_dataset(new_annotations_folder, new_video_folder, convert_annotations_folder, convert_image_folder,
+                            frame_rate, override_checks=False):
     """
-    Merges all given json files in json_folder to a new json file that is stored in output_folder under the new name.
+    Converts paired videos to jpg images and annotations to coco format json files.
 
     Args:
-        json_folder (str): A path of the folder.
-        json_files (list): A list of selected files to be merged in to a single .json file.
-        name (str): A name of the new file.
-        output_folder (str): A path to the folder where the formatted annotation will be stored.
-        overwrite (bool): Overwrites any pre-existent merged file.
+        new_annotations_folder (str): A path to the folder with annotations.
+        new_video_folder (str): A path to folder with videos.
+        convert_annotations_folder (str): A path to the folder for formatted annotations.
+        convert_image_folder (str): A path to the folder for images got from the video.
+        frame_rate (int): Determines which frames should be converted (each 10th for instance).
+        override_checks (bool): Overrides checks if annotations are already present.
 
     """
-    out_path = output_folder + "/" + name + ".json"
-    result = {}
-    # Checks if the file already exists
-    if os.path.isfile(out_path) and not overwrite:
-        print(f"{out_path} already exists.")
-        return
 
-    for file in json_files:
-        if file.endswith(".json") and file != name + ".json":
-            with open(json_folder + "/" + file, "r") as reader:
-                current = json.load(reader)
-                if len(list(result.keys())) == 0:
-                    for key in list(current.keys()):
-                        result[key] = []
-                # for unique values (image, annotations)
-                for var in list(current.keys())[:-1]:
-                    result[var].extend(current[var])
-                # for same values (categories)
-                result["categories"] = current["categories"]
+    names_paired = check_pairs(new_annotations_folder, new_video_folder)
 
-    with open(out_path, "w") as outfile:
-        json.dump(result, outfile)
+    # take each paired name, convert video to jpgs, create new COCO-style annotation
+    for i, name in enumerate(names_paired):
+        video_path = new_video_folder + "/" + name + NEW_VIDEO_TYPE
+        ann_path = new_annotations_folder + "/" + name + NEW_ANNOTATION_TYPE
 
+        # test if already converted
+        likely_ann_path = convert_annotations_folder + "/" + name + ".json"
+
+        # Checks if the annotation file already exists. If so, skips the conversion.
+        if os.path.isfile(likely_ann_path) and not override_checks:
+            print(f"{likely_ann_path} already exists.")
+            continue
+
+        # Converts an annotation file with corresponding video.
+        pdestre_to_coco(ann_path, video_path, name, convert_annotations_folder, convert_image_folder,
+                        frame_rate=frame_rate)

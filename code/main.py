@@ -1,81 +1,13 @@
 import itertools
 import random
-import plot_logs
-import sanity_checks
-from mmdet.apis import init_detector, train_detector, inference_detector, show_result_pyplot
-from pdestre_conversion import *
-from settings import *
 from mmdet.datasets import build_dataset
 from mmdet.models import build_detector
+from mmdet.apis import init_detector, train_detector, inference_detector, show_result_pyplot
 
-
-def check_pairs(new_annotations_folder, new_video_folder):
-    """
-    Checks for paired annotation and video names.
-
-    Args:
-        new_annotations_folder (str): A path to the folder with annotations.
-        new_video_folder (str): A path to folder with videos.
-
-    Returns:
-         names_paired: A list of strings (names of files that are paired).
-    """
-
-    annotation_names = files_in_folder(new_annotations_folder)
-    video_names = files_in_folder(new_video_folder)
-
-    # remove .type suffix
-    annotation_type = NEW_ANNOTATION_TYPE
-    video_type = NEW_VIDEO_TYPE
-    for i, ann in enumerate(annotation_names):
-        annotation_names[i] = ann.removesuffix(annotation_type)
-    for i, vid in enumerate(video_names):
-        video_names[i] = vid.removesuffix(video_type)
-
-    # check paired names
-    names_paired = []
-    for annotation_name in annotation_names:
-        if annotation_name in video_names:
-            # remove wrong data pairs:
-            if not annotation_name.startswith("._"):
-                names_paired.append(annotation_name)
-
-    return names_paired
-
-
-def convert_pdestre_dataset(new_annotations_folder, new_video_folder, convert_annotations_folder, convert_image_folder,
-                            frame_rate, override_checks=False):
-    """
-    Converts paired videos to jpg images and annotations to coco format json files.
-
-    Args:
-        new_annotations_folder (str): A path to the folder with annotations.
-        new_video_folder (str): A path to folder with videos.
-        convert_annotations_folder (str): A path to the folder for formatted annotations.
-        convert_image_folder (str): A path to the folder for images got from the video.
-        frame_rate (int): Determines which frames should be converted (each 10th for instance).
-        override_checks (bool): Overrides checks if annotations are already present.
-
-    """
-
-    names_paired = check_pairs(new_annotations_folder, new_video_folder)
-
-    # take each paired name, convert video to jpgs, create new COCO-style annotation
-    for i, name in enumerate(names_paired):
-        video_path = new_video_folder + "/" + name + NEW_VIDEO_TYPE
-        ann_path = new_annotations_folder + "/" + name + NEW_ANNOTATION_TYPE
-
-        # test if already converted
-        likely_ann_path = convert_annotations_folder + "/" + name + ".json"
-
-        # Checks if the annotation file already exists. If so, skips the conversion.
-        if os.path.isfile(likely_ann_path) and not override_checks:
-            print(f"{likely_ann_path} already exists.")
-            continue
-
-        # Converts an annotation file with corresponding video.
-        pdestre_to_coco(ann_path, video_path, name, convert_annotations_folder, convert_image_folder,
-                        frame_rate=frame_rate)
+import plot_logs
+from merge_pdestre_json import select_json_to_merge, merge_json_files
+from pdestre_conversion import *
+from settings import *
 
 
 def prepare_data():
@@ -115,7 +47,7 @@ def train(create_params=False):
 
     Results are stored in train_exports directory.
     """
-    from main_config import cfg
+    from org_config import cfg
 
     datasets = [build_dataset(cfg.data.train)]  # mmdet/datasets/ utils.py - change __check_head
 
@@ -154,8 +86,6 @@ def test():
     The interference is stored in the "out_prefix" folder.
 
     """
-
-    from main_config import cfg
 
     # Control - original model
     # config_file = '../configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py'
@@ -209,6 +139,7 @@ def main():
 
 
 if __name__ == "__main__":
+    """ Testing sanity-checks, """
     # sanity_checks.check_formatted_data("../data/P-DESTRE/coco_format/merged/mini_train.json", CONVERTED_IMAGE_FOLDER,
     #                  "../results/test_check")
     # sanity_checks.create_mini_dataset("../data/P-DESTRE/coco_format/merged/large_train.json",
@@ -218,5 +149,7 @@ if __name__ == "__main__":
 
     # python tools/train.py configs/my_config/main_config.py
     # checkpoints/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth
+
+    """ Using built-in commands shortcut """
     # os.system("python ../tools/train.py ../configs/my_config/main_config.py")
     os.system("python ../tools/test.py ../configs/my_config/main_config.py work_dirs/main_config/latest.pth --show")
