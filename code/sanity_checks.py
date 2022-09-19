@@ -71,7 +71,3 @@ def test_image():
         img = mmcv.imread(e)
         result = inference_detector(model, img)
         show_result_pyplot(model, img, result)
-
-
-
-

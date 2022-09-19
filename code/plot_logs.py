@@ -122,5 +122,3 @@ def plot_all_logs_in_dir(work_dir, recursive=False):
                 plot_log(log_file, title, out_file)
         if not recursive:
             break
-
-
