@@ -5,31 +5,31 @@ from mmdet.models import build_detector
 from mmdet.apis import init_detector, train_detector, inference_detector, show_result_pyplot
 
 import plot_logs
-from merge_pdestre_json import select_json_to_merge, merge_json_files
+from merge_pdestre2json import select_jsons_to_merge, merge_json_files
 from pdestre_conversion import *
 from settings import *
 
 
-def prepare_data():
+def convert_data():
     """
     Converts P-DESTRE dataset by converting videos to images and text annotations to coco formatted .json files.
     Then the annotations are merged into large and small variant of train and test datasets.
     """
     print("\nConverting...\n")
     # Converts every video to images and every annotation to coco format .json file
-    convert_pdestre_dataset(NEW_ANNOTATIONS_FOLDER, NEW_VIDEO_FOLDER,
-                            CONVERTED_ANNOTATIONS_FOLDER, CONVERTED_IMAGE_FOLDER, frame_rate=20)
+    convert_pdestre_anns(NEW_ANNOTATIONS_FOLDER, NEW_VIDEO_FOLDER,
+                         CONVERTED_ANNOTATIONS_FOLDER, CONVERTED_IMAGE_FOLDER, frame_rate=20)
 
     print("\nMerging...\n")
     # Create pdestre_large
-    train_files, test_files = select_json_to_merge(CONVERTED_ANNOTATIONS_FOLDER, 75, shuffle=True, divide=True)
+    train_files, test_files = select_jsons_to_merge(CONVERTED_ANNOTATIONS_FOLDER, num_files=75, shuffle=True, divide=True)
     merge_json_files(CONVERTED_ANNOTATIONS_FOLDER, train_files,
                      "large_train", "../data/P-DESTRE/coco_format/merged", overwrite=False)
     merge_json_files(CONVERTED_ANNOTATIONS_FOLDER, test_files,
                      "large_test", "../data/P-DESTRE/coco_format/merged", overwrite=False)
 
     # Create pdestre_small
-    train_files, test_files = select_json_to_merge(CONVERTED_ANNOTATIONS_FOLDER, 16, shuffle=True, divide=True)
+    train_files, test_files = select_jsons_to_merge(CONVERTED_ANNOTATIONS_FOLDER, num_files=16, shuffle=True, divide=True)
     merge_json_files(CONVERTED_ANNOTATIONS_FOLDER, train_files,
                      "small_train", "../data/P-DESTRE/coco_format/merged", overwrite=True)
     merge_json_files(CONVERTED_ANNOTATIONS_FOLDER, test_files,
@@ -58,9 +58,9 @@ def train(create_params=False):
         learning_rates = [random.uniform(0.0004, 0.00001) for _ in range(3)]
         weight_decays = [random.uniform(0.01, 0.00001) for _ in range(6)]
 
-    combinations = list(itertools.product(learning_rates, weight_decays))
+    train_combinations = list(itertools.product(learning_rates, weight_decays))
 
-    for i, (learning_rate, weight_decay) in enumerate(combinations):
+    for i, (learning_rate, weight_decay) in enumerate(train_combinations):
         print(f"Learning rate: {learning_rate}\nWeight decay: {weight_decay}")
         # cfg.load_from = "../checkpoints/results/favorites/s32_e2_lr_1,3e4/latest.pth"
         # cfg.optimizer = dict(type='SGD', lr=learning_rate, momentum=0.9, weight_decay=weight_decay)
@@ -71,7 +71,7 @@ def train(create_params=False):
         #     warmup_iters=500,
         #     warmup_ratio=0.001,
         #     step=[7])
-        # cfg.work_dir = f"./train_exports/lr{learning_rate:.1e}_wd{weight_decay:.1e}"
+        # cfg.work_dir_path = f"./train_exports/lr{learning_rate:.1e}_wd{weight_decay:.1e}"
 
         model = build_detector(cfg.model, train_cfg=cfg.get('train_cfg'), test_cfg=cfg.get('test_cfg'))
         model.CLASSES = ("person", )
@@ -143,7 +143,7 @@ if __name__ == "__main__":
     # sanity_checks.check_formatted_data("../data/P-DESTRE/coco_format/merged/mini_train.json", CONVERTED_IMAGE_FOLDER,
     #                  "../results/test_check")
     # sanity_checks.create_mini_dataset("../data/P-DESTRE/coco_format/merged/large_train.json",
-    #                                   "../data/P-DESTRE/coco_format/merged", 20)
+    #                                   "../data/P-DESTRE/coco_format/merged", mini_train, 20)
     # main()
     # sanity_checks.test_image()
 

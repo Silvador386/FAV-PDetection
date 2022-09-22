@@ -5,7 +5,7 @@ import random
 from utils import files_in_folder
 
 
-def select_json_to_merge(json_folder, num_files=10, shuffle=False, divide=False):
+def select_jsons_to_merge(json_folder, num_files=10, shuffle=False, divide=False):
     """
     Takes in a folder with .json annotations. Selects files to be merged and returns tuple of train and test
     file names in the ration of 10:1.

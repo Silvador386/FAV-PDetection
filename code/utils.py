@@ -21,7 +21,7 @@ def files_in_folder(path):
     return file_names
 
 
-def convert_video_to_jpg(video_name, video_path, output_path, frame_rate=10):
+def convert_video_to_jpgs(video_name, video_path, output_path, frame_rate=10):
     """
     Converts video from video_path to jpg images and stores the in the output_path.
     Jpg file convention:

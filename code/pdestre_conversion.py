@@ -7,7 +7,7 @@ from settings import *
 from utils import files_in_folder
 
 
-def pdestre_to_coco(ann_path, video_path, current_name, output_folder, image_folder, frame_rate=10):
+def pdestre_anns_to_coco(ann_path, video_path, file_name, output_folder, image_folder, frame_rate=10):
     """
     Takes annotations at the ann_path, takes video at the video_path. Reads the annotation and for the specific frame
     it creates a jpg image from video which is then stored at the image_folder.
@@ -15,14 +15,14 @@ def pdestre_to_coco(ann_path, video_path, current_name, output_folder, image_fol
     Args:
         ann_path (str): A path to the annotation.
         video_path (str): A path the the video.
-        current_name (str): The name of the file (must be same for the annotation and the video).
+        file_name (str): The name of the file (must be same for the annotation and the video).
         output_folder (str): A path to the folder where the formatted annotation will be stored.
         image_folder (str): A path to the folder where the images will be stored.
         frame_rate (int): Frame rate declares frames should be converted
                           e.g. frame_rate=10 -> each 10. frame will be converted to jpg.
     """
 
-    out_path = output_folder + "/" + current_name + ".json"
+    output_path = output_folder + "/" + file_name + ".json"
 
     # load video
     print(f"Converting video from: {video_path}")
@@ -33,26 +33,27 @@ def pdestre_to_coco(ann_path, video_path, current_name, output_folder, image_fol
     with open(ann_path, "r") as reader:
         ann_list = reader.readlines()
 
-    category = {"id": 0, "name": "person"}  # only one category - person
+    categories = {"id": 0, "name": "person"}  # only one category - person
 
-    final = {"images": [],
-             "annotations": [],
-             "categories": []}
+    coco_json = {"images": [],
+                 "annotations": [],
+                 "categories": []
+                 }
 
-    final["categories"].append(category)
+    coco_json["categories"].append(categories)
 
-    previous = 0  # to keep track of frame of the previous annotation line
+    previous_frame_idx = 0  # to keep track of frame of the previous annotation line
     img_idx = 0  #
     for i, ann_line in enumerate(ann_list):
-        ann_line = ann_line.split(",")
-        frame_idx = int(ann_line[0])  # current frame
+        ann_line_values = ann_line.split(",")
+        frame_idx = int(ann_line_values[0])  # current frame
 
         if frame_idx % frame_rate == 0:
-            image_id = int(current_name.replace("-", "").replace("2019", "") + "0" + str(frame_idx))  # generates img id
-            id = int(current_name.replace("-", "").replace("2019", "") + str(i))                      # generates ann id
+            image_id = int(file_name.replace("-", "").replace("2019", "") + "0" + str(frame_idx))  # generates img id
+            ann_id = int(file_name.replace("-", "").replace("2019", "") + str(i))                      # generates ann id
 
-            if frame_idx > previous:  # new frame in annotations -> create new corresponding jpg
-                img_name = current_name + f"_f{frame_idx:05}.jpg"
+            if frame_idx > previous_frame_idx:  # new frame in annotations -> create new corresponding jpg
+                img_name = file_name + f"_f{frame_idx:05}.jpg"
                 img_file_name = image_folder + "/" + img_name
 
                 # Checks if the image already exists
@@ -75,24 +76,24 @@ def pdestre_to_coco(ann_path, video_path, current_name, output_folder, image_fol
                 image = mmcv.imread(img_file_name)
                 width, height = image.shape[:2]
                 image_info = dict(file_name=img_name, width=width, height=height, id=image_id)
-                final["images"].append(image_info)
-                previous = frame_idx
+                coco_json["images"].append(image_info)
+                previous_frame_idx = frame_idx
 
             # Store annotation
-            bbox = [float(val) for val in ann_line[2:6]]
+            bbox = [float(val) for val in ann_line_values[2:6]]
             area = bbox[2] * bbox[3]
-            ann_info = dict(image_id=image_id, bbox=bbox, category_id=0, id=id,
-                            area=area, iscrowd=0)
-            final["annotations"].append(ann_info)
+            formatted_ann = dict(image_id=image_id, bbox=bbox, category_id=0, id=ann_id,
+                                 area=area, iscrowd=0)
+            coco_json["annotations"].append(formatted_ann)
 
     # Convert data to json a store them
-    json_out = json.dumps(final)
-    with open(out_path, "w") as outfile:
-        print(f"Storing annotations to json at: {out_path}")
-        outfile.write(json_out)
+    json_output = json.dumps(coco_json)
+    with open(output_path, "w") as outfile:
+        print(f"Storing annotations to json at: {output_path}")
+        outfile.write(json_output)
 
 
-def check_pairs(new_annotations_folder, new_video_folder):
+def check_pairs_in_dataset(new_annotations_folder, new_video_folder):
     """
     Checks for paired annotation and video names.
 
@@ -126,8 +127,8 @@ def check_pairs(new_annotations_folder, new_video_folder):
     return names_paired
 
 
-def convert_pdestre_dataset(new_annotations_folder, new_video_folder, convert_annotations_folder, convert_image_folder,
-                            frame_rate, override_checks=False):
+def convert_pdestre_anns(new_annotations_folder, new_video_folder, convert_annotations_folder, convert_image_folder,
+                         frame_rate, override_checks=False):
     """
     Converts paired videos to jpg images and annotations to coco format json files.
 
@@ -141,7 +142,7 @@ def convert_pdestre_dataset(new_annotations_folder, new_video_folder, convert_an
 
     """
 
-    names_paired = check_pairs(new_annotations_folder, new_video_folder)
+    names_paired = check_pairs_in_dataset(new_annotations_folder, new_video_folder)
 
     # take each paired name, convert video to jpgs, create new COCO-style annotation
     for i, name in enumerate(names_paired):
@@ -157,5 +158,5 @@ def convert_pdestre_dataset(new_annotations_folder, new_video_folder, convert_an
             continue
 
         # Converts an annotation file with corresponding video.
-        pdestre_to_coco(ann_path, video_path, name, convert_annotations_folder, convert_image_folder,
-                        frame_rate=frame_rate)
+        pdestre_anns_to_coco(ann_path, video_path, name, convert_annotations_folder, convert_image_folder,
+                             frame_rate=frame_rate)
