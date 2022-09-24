@@ -141,16 +141,14 @@ def main():
 
 if __name__ == "__main__":
     """ Testing sanity-checks, """
-    # sanity_checks.check_formatted_data("../data/P-DESTRE/coco_format/merged/micro_train.json", CONVERTED_IMAGE_FOLDER,
-    #                  "../results/test_check", num_checked=2)
-    sanity_checks.create_mini_dataset("../data/P-DESTRE/coco_format/merged/large_train.json",
-                                      "../data/P-DESTRE/coco_format/merged", "debug_trial", 2)
+
+    # sanity_checks.create_mini_dataset("../data/P-DESTRE/coco_format/merged/large_train.json",
+    #                                   "../data/P-DESTRE/coco_format/merged", "debug_trial", 2)
     # main()
-    # sanity_checks.test_overfit_image()
-
-
-    # python tools/train.py configs/my_config/main_config.py
-    # checkpoints/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth
+    sanity_checks.test_json_anns(ann_path="../data/P-DESTRE/coco_format/merged/micro_train.json",
+                                 img_dir=CONVERTED_IMAGE_FOLDER, output_dir="../results/test_json_anns",
+                                 model=None
+                                 )
 
     """ Using built-in commands shortcut """
     # os.system("python ../tools/train.py ../configs/my_config/main_config.py")

@@ -12,25 +12,6 @@ def load_ann_data(ann_path):
     return ann_data["images"], ann_data["annotations"], ann_data["categories"]
 
 
-def check_formatted_data(ann_path, img_folder_path, output_path, num_checked=50):
-    images, annotations, _ = load_ann_data(ann_path)
-
-    for _ in range(num_checked):
-        img_selected = random.choice(images)
-        img_name = img_selected["file_name"]
-        img = cv2.imread(img_folder_path + "/" + img_name)
-        anns_selected = []
-        for ann in annotations:
-            if ann["image_id"] == img_selected["id"]:
-                anns_selected.append(ann)
-                bbox = ann["bbox"]
-                bottom_left_corner = int(bbox[0]), int(bbox[1])
-                upper_right_corner = int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3])
-                img = cv2.rectangle(img, bottom_left_corner, upper_right_corner, (0, 0, 255), 2)
-
-        cv2.imwrite(output_path + "/" + img_name, img)
-
-
 def create_mini_dataset(ann_path, output_path, file_name, num_images):
     images, annotations, categories = load_ann_data(ann_path)
 
@@ -48,28 +29,58 @@ def create_mini_dataset(ann_path, output_path, file_name, num_images):
     write_to_json(coco_json, f"{output_path}/{file_name}.json")
 
 
-def test_overfit_image():
+def test_rect_anns(ann_path, img_dir, output_dir, max_num=-1):
+
+    images, annotations, _ = load_ann_data(ann_path)
+
+    for i, image in enumerate(images):
+        img_name = image["file_name"]
+        img = cv2.imread(img_dir + "/" + img_name)
+        anns_selected = []
+        for ann in annotations:
+            if ann["image_id"] == image["id"]:
+                anns_selected.append(ann)
+                bbox = ann["bbox"]
+                bottom_left_corner = int(bbox[0]), int(bbox[1])
+                upper_right_corner = int(bbox[0] + bbox[2]), int(bbox[1] + bbox[3])
+                img = cv2.rectangle(img, bottom_left_corner, upper_right_corner, (0, 0, 255), 2)
+
+        if output_dir is not None:
+            output_path = f"{output_dir}/rect_{img_name}"
+            print(f"Writing to: {output_path}")
+            cv2.imwrite(output_path, img)
+
+        if i == max_num:
+            break
+
+
+def test_image_inference(ann_path, img_folder_path, model, output_dir, max_num=-1):
     import mmcv
     from mmdet.apis import init_detector, inference_detector, show_result_pyplot
-    from settings import CONVERTED_IMAGE_FOLDER
+    from settings import DEFAULT_CONFIG, DEFAULT_CHECKPOINT, DEFAULT_CHECKPOINT_LATEST
 
-    config_file = "../configs/my_config/main_config.py"
-    checkpoint_file = "work_dirs/main_config/latest.pth"
-    out_prefix = "../results/pdestre"
+    if model is None:
+        model = init_detector(DEFAULT_CONFIG, DEFAULT_CHECKPOINT_LATEST, device='cuda:0')
 
-    model = init_detector(config_file, checkpoint_file, device='cuda:0')
+    images, annotations, categories = load_ann_data(ann_path)
 
-    # Randomly picked images to be shown
-    images, annotations, categories = load_ann_data("../data/P-DESTRE/coco_format/merged/micro_train.json")
-    pdestre_examples = [CONVERTED_IMAGE_FOLDER + "/" + images[0]["file_name"],
-                        CONVERTED_IMAGE_FOLDER + "/" + images[1]["file_name"]
-                        ]
-
-    for e in pdestre_examples:
-        img = mmcv.imread(e)
+    for i, image in enumerate(images):
+        img_name = image["file_name"]
+        img_path = f"{img_folder_path}/{img_name}"
+        img = mmcv.imread(img_path)
         result = inference_detector(model, img)
-        show_result_pyplot(model, img, result)
+
+        if output_dir is None:
+            show_result_pyplot(model, img, result)
+        else:
+            output_path = f"{output_dir}/model_{img_name}"
+            print(f"Writing to: {output_path}")
+            model.show_result(img, result, out_file=output_path)
+
+        if i == max_num:
+            break
 
 
-def compare_test_ann_img():
-    pass
+def test_json_anns(ann_path, img_dir, output_dir=None, model=None, max_num=-1):
+    test_rect_anns(ann_path, img_dir, output_dir, max_num)
+    test_image_inference(ann_path, img_dir, model, output_dir, max_num)

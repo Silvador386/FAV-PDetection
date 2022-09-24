@@ -77,13 +77,14 @@ def pdestre_anns_to_coco(ann_path, video_path, file_name, output_folder, image_f
     img_convertor = Vid2ImgConverter(coco_json, vidcap)
 
     previous_frame_idx = 0  # to keep track of frame of the previous annotation line
-    for i, ann_line in enumerate(ann_list):
+    for ann_idx, ann_line in enumerate(ann_list):
         ann_line_values = ann_line.split(",")
         frame_idx = int(ann_line_values[0])  # current frame
 
         if frame_idx % frame_rate == 0:
-            image_id = int(file_name.replace("-", "").replace("2019", "") + "0" + str(frame_idx))  # generates img id
-            ann_id = int(file_name.replace("-", "").replace("2019", "") + str(i))                      # generates ann id
+            id_prefix = file_name.replace("-", "").replace("2019", "")
+            image_id = int(id_prefix + "0" + str(frame_idx))  # generates img id
+            ann_id = int(id_prefix + str(ann_idx))            # generates ann id
 
             if frame_idx > previous_frame_idx:  # new frame in annotations -> create new corresponding jpg
                 img_name = file_name + f"_f{frame_idx:05}.jpg"
