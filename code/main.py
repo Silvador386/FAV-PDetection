@@ -141,12 +141,12 @@ def main():
 
 if __name__ == "__main__":
     """ Testing sanity-checks, """
-    sanity_checks.check_formatted_data("../data/P-DESTRE/coco_format/merged/micro_train.json", CONVERTED_IMAGE_FOLDER,
-                     "../results/test_check", num_checked=2)
-    # sanity_checks.create_mini_dataset("../data/P-DESTRE/coco_format/merged/large_train.json",
-    #                                   "../data/P-DESTRE/coco_format/merged", "micro_train", 2)
+    # sanity_checks.check_formatted_data("../data/P-DESTRE/coco_format/merged/micro_train.json", CONVERTED_IMAGE_FOLDER,
+    #                  "../results/test_check", num_checked=2)
+    sanity_checks.create_mini_dataset("../data/P-DESTRE/coco_format/merged/large_train.json",
+                                      "../data/P-DESTRE/coco_format/merged", "debug_trial", 2)
     # main()
-    sanity_checks.test_overfit_image()
+    # sanity_checks.test_overfit_image()
 
 
     # python tools/train.py configs/my_config/main_config.py

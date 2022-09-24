@@ -2,6 +2,8 @@ import json
 import cv2
 import random
 
+from utils import write_to_json
+
 
 def load_ann_data(ann_path):
     with open(ann_path, "r") as fp:
@@ -43,8 +45,7 @@ def create_mini_dataset(ann_path, output_path, file_name, num_images):
             if ann["image_id"] == img_selected["id"]:
                 coco_json["annotations"].append(ann)
 
-    with open(output_path + "/" + file_name + ".json", "w") as fp:
-        json.dump(coco_json, fp)
+    write_to_json(coco_json, f"{output_path}/{file_name}.json")
 
 
 def test_overfit_image():

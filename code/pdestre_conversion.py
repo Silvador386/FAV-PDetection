@@ -4,7 +4,50 @@ import json
 import mmcv
 
 from settings import *
-from utils import files_in_folder
+from utils import files_in_folder, write_to_json
+
+
+class Vid2ImgConverter:
+    def __init__(self, coco_json, vidcap):
+        self.coco_json = coco_json
+        self.vidcap = vidcap
+        self.img_idx = 0
+
+    def create_next_annotated_image(self, img_name, img_path, image_id, frame_idx):
+        read_error = False
+        # Checks if the image already exists
+        if not os.path.isfile(img_path):
+            # Create the current image
+            while self.img_idx < frame_idx:  # iterates util the current frame is found
+                success, image = self.vidcap.read()
+                if not success:
+                    print(f"vidcap.read() not successful!\n Filename: {img_path}")
+                    read_error = True
+                    break
+                self.img_idx += 1
+                if self.img_idx == frame_idx:
+                    cv2.imwrite(img_path, image)  # save frame as JPEG file
+
+        # store the image info
+        image = mmcv.imread(img_path)
+        width, height = image.shape[:2]
+        image_info = dict(file_name=img_name, width=width, height=height, id=image_id)
+        self.coco_json["images"].append(image_info)
+
+        return read_error
+
+
+def load_anns_vidcap(ann_path, video_path):
+    # load video
+    print(f"Converting video from: {video_path}")
+    vidcap = cv2.VideoCapture(video_path)
+
+    # load annotations as list
+    print(f"Converting annotations from: {ann_path}")
+    with open(ann_path, "r") as reader:
+        ann_list = reader.readlines()
+
+    return ann_list, vidcap
 
 
 def pdestre_anns_to_coco(ann_path, video_path, file_name, output_folder, image_folder, frame_rate=10):
@@ -22,28 +65,18 @@ def pdestre_anns_to_coco(ann_path, video_path, file_name, output_folder, image_f
                           e.g. frame_rate=10 -> each 10. frame will be converted to jpg.
     """
 
-    output_path = output_folder + "/" + file_name + ".json"
-
-    # load video
-    print(f"Converting video from: {video_path}")
-    vidcap = cv2.VideoCapture(video_path)
-
-    # load annotations as list
-    print(f"Converting annotations from: {ann_path}")
-    with open(ann_path, "r") as reader:
-        ann_list = reader.readlines()
-
-    categories = {"id": 0, "name": "person"}  # only one category - person
-
     coco_json = {"images": [],
                  "annotations": [],
                  "categories": []
                  }
 
+    categories = {"id": 0, "name": "person"}  # only one category - person
     coco_json["categories"].append(categories)
 
+    ann_list, vidcap = load_anns_vidcap(ann_path, video_path)
+    img_convertor = Vid2ImgConverter(coco_json, vidcap)
+
     previous_frame_idx = 0  # to keep track of frame of the previous annotation line
-    img_idx = 0  #
     for i, ann_line in enumerate(ann_list):
         ann_line_values = ann_line.split(",")
         frame_idx = int(ann_line_values[0])  # current frame
@@ -56,28 +89,34 @@ def pdestre_anns_to_coco(ann_path, video_path, file_name, output_folder, image_f
                 img_name = file_name + f"_f{frame_idx:05}.jpg"
                 img_file_name = image_folder + "/" + img_name
 
-                # Checks if the image already exists
-                if not os.path.isfile(img_file_name):
-                    # Convert the image
-                    skip = False  # skips the annotation line if the read was unsuccessful
-                    while img_idx < frame_idx:  # iterates util the current frame is found
-                        success, image = vidcap.read()
-                        if not success:
-                            print(f"vidcap.read() not successful!\n Filename: {img_name}")
-                            skip = True
-                            break
-                        img_idx += 1
-                        if img_idx == frame_idx:
-                            cv2.imwrite(img_file_name, image)  # save frame as JPEG file
-                    if skip:
-                        continue
-
-                # store the image info
-                image = mmcv.imread(img_file_name)
-                width, height = image.shape[:2]
-                image_info = dict(file_name=img_name, width=width, height=height, id=image_id)
-                coco_json["images"].append(image_info)
+                read_error = img_convertor.create_next_annotated_image(img_name, img_file_name, image_id, frame_idx)
+                if read_error:
+                    continue
                 previous_frame_idx = frame_idx
+
+                # # Checks if the image already exists
+                # if not os.path.isfile(img_file_name):
+                #     # Convert the image
+                #     skip = False  # skips the annotation line if the read was unsuccessful
+                #     while img_idx < frame_idx:  # iterates util the current frame is found
+                #         success, image = vidcap.read()
+                #         if not success:
+                #             print(f"vidcap.read() not successful!\n Filename: {img_name}")
+                #             skip = True
+                #             break
+                #         img_idx += 1
+                #         if img_idx == frame_idx:
+                #             cv2.imwrite(img_file_name, image)  # save frame as JPEG file
+                #     if skip:
+                #         continue
+                #
+                #
+                # # store the image info
+                # image = mmcv.imread(img_file_name)
+                # width, height = image.shape[:2]
+                # image_info = dict(file_name=img_name, width=width, height=height, id=image_id)
+                # coco_json["images"].append(image_info)
+
 
             # Store annotation
             bbox = [float(val) for val in ann_line_values[2:6]]
@@ -86,11 +125,12 @@ def pdestre_anns_to_coco(ann_path, video_path, file_name, output_folder, image_f
                                  area=area, iscrowd=0)
             coco_json["annotations"].append(formatted_ann)
 
-    # Convert data to json a store them
-    json_output = json.dumps(coco_json)
-    with open(output_path, "w") as outfile:
-        print(f"Storing annotations to json at: {output_path}")
-        outfile.write(json_output)
+    write_to_json(coco_json, output_path=output_folder + "/" + file_name + ".json")
+
+    # json_output = json.dumps(coco_json)
+    # with open(output_path, "w") as outfile:
+    #     print(f"Storing annotations to json at: {output_path}")
+    #     outfile.write(json_output)
 
 
 def check_pairs_in_dataset(new_annotations_folder, new_video_folder):

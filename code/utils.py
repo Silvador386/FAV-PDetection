@@ -1,4 +1,5 @@
 import os
+import json
 import cv2 as cv2
 
 
@@ -45,3 +46,9 @@ def convert_video_to_jpgs(video_name, video_path, output_path, frame_rate=10):
         success, image = vidcap.read()
         count += 1
     print("Converting finished.")
+
+
+def write_to_json(json_style_dict, output_path):
+    with open(output_path, "w") as fp:
+        print(f"Storing data to json at: {output_path}")
+        json.dump(json_style_dict, fp)
