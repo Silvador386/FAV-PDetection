@@ -5,6 +5,7 @@ from mmdet.models import build_detector
 from mmdet.apis import init_detector, train_detector, inference_detector, show_result_pyplot
 
 import plot_logs
+import sanity_checks
 from merge_pdestre2json import select_jsons_to_merge, merge_json_files
 from pdestre_conversion import *
 from settings import *
@@ -140,16 +141,18 @@ def main():
 
 if __name__ == "__main__":
     """ Testing sanity-checks, """
-    # sanity_checks.check_formatted_data("../data/P-DESTRE/coco_format/merged/mini_train.json", CONVERTED_IMAGE_FOLDER,
-    #                  "../results/test_check")
+    sanity_checks.check_formatted_data("../data/P-DESTRE/coco_format/merged/micro_train.json", CONVERTED_IMAGE_FOLDER,
+                     "../results/test_check", num_checked=2)
     # sanity_checks.create_mini_dataset("../data/P-DESTRE/coco_format/merged/large_train.json",
-    #                                   "../data/P-DESTRE/coco_format/merged", mini_train, 20)
+    #                                   "../data/P-DESTRE/coco_format/merged", "micro_train", 2)
     # main()
-    # sanity_checks.test_image()
+    sanity_checks.test_overfit_image()
+
 
     # python tools/train.py configs/my_config/main_config.py
     # checkpoints/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth
 
     """ Using built-in commands shortcut """
     # os.system("python ../tools/train.py ../configs/my_config/main_config.py")
-    os.system("python ../tools/test.py ../configs/my_config/main_config.py work_dirs/main_config/latest.pth --show")
+    # os.system("python ../tools/test.py ../configs/my_config/main_config.py work_dirs/main_config/latest.pth --show")
+

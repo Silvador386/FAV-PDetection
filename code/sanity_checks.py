@@ -47,25 +47,28 @@ def create_mini_dataset(ann_path, output_path, file_name, num_images):
         json.dump(coco_json, fp)
 
 
-def test_image():
+def test_overfit_image():
     import mmcv
-    from org_config import cfg
     from mmdet.apis import init_detector, inference_detector, show_result_pyplot
     from settings import CONVERTED_IMAGE_FOLDER
 
-    config_file = cfg
-    checkpoint_file = "train_exports/epoch_4.pth"
+    config_file = "../configs/my_config/main_config.py"
+    checkpoint_file = "work_dirs/main_config/latest.pth"
     out_prefix = "../results/pdestre"
 
     model = init_detector(config_file, checkpoint_file, device='cuda:0')
 
     # Randomly picked images to be shown
-    images, annotations, categories = load_ann_data("../data/P-DESTRE/coco_format/merged/mini_train.json")
+    images, annotations, categories = load_ann_data("../data/P-DESTRE/coco_format/merged/micro_train.json")
     pdestre_examples = [CONVERTED_IMAGE_FOLDER + "/" + images[0]["file_name"],
-
+                        CONVERTED_IMAGE_FOLDER + "/" + images[1]["file_name"]
                         ]
 
     for e in pdestre_examples:
         img = mmcv.imread(e)
         result = inference_detector(model, img)
         show_result_pyplot(model, img, result)
+
+
+def compare_test_ann_img():
+    pass

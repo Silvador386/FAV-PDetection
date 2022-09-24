@@ -43,12 +43,12 @@ def create_log_plot(train_logs, val_logs, title, out):
         x_train_loss.append(log_dict["iter"] + log_dict["epoch"] * num_iter)
         y_train_loss.append(log_dict["loss"])
 
-    picked_val_names = ["bbox_mAP", "bbox_mAP_50", "bbox_mAP_75", "bbox_mAP_m", "bbox_mAP_l"]
+    SELECTED_VALUES = ["bbox_mAP", "bbox_mAP_50", "bbox_mAP_75", "bbox_mAP_m", "bbox_mAP_l"]
     x_validation = []
-    y_validation_values = {name: [] for name in picked_val_names}
+    y_validation_values = {name: [] for name in SELECTED_VALUES}
     for log_dict in val_logs:
         x_validation.append(log_dict["epoch"])
-        for val_name in picked_val_names:
+        for val_name in SELECTED_VALUES:
             y_validation_values[val_name].append(log_dict[val_name])
 
     fig, axs = plt.subplots(nrows=2, ncols=1, figsize=(12, 8))
