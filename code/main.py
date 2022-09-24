@@ -145,10 +145,12 @@ if __name__ == "__main__":
     # sanity_checks.create_mini_dataset("../data/P-DESTRE/coco_format/merged/large_train.json",
     #                                   "../data/P-DESTRE/coco_format/merged", "debug_trial", 2)
     # main()
-    sanity_checks.test_json_anns(ann_path="../data/P-DESTRE/coco_format/merged/micro_train.json",
-                                 img_dir=CONVERTED_IMAGE_DIR, output_dir="../results/test_json_anns",
-                                 model=None
-                                 )
+    # sanity_checks.test_json_anns(ann_path="../data/P-DESTRE/coco_format/merged/micro_train.json",
+    #                              img_dir=CONVERTED_IMAGE_DIR, output_dir="../results/test_json_anns",
+    #                              model=None
+    #                              )
+
+    plot_logs.plot_log_save("./work_dirs/main_config/20220923_172713.log.json")
 
     """ Using built-in commands shortcut """
     # os.system("python ../tools/train.py ../configs/my_config/main_config.py")

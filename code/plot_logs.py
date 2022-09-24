@@ -3,25 +3,117 @@ import os
 import matplotlib.pyplot as plt
 
 
-def load_logs(log_file_path):
-    """
-    Processes data from log.
-    Args:
-        log_file_path (str): A path of the json log file.
-    Returns:
-        train_logs (list): A list of dictionaries with train_logs data.
-        val_logs (list): A list of dictionaries with validation data.
-    """
-    train_logs, val_logs = [], []
-    with open(log_file_path, "r") as json_logs:
-        for json_line in json_logs:
-            log_line = json.loads(json_line.strip())
-            if log_line["mode"] == "val_logs":
-                val_logs.append(log_line)
-            else:
-                train_logs.append(log_line)
+def log_types(json_log_path):
+    types_present = set()
+    with open(json_log_path, "r") as json_logs:
+        for json_log in json_logs:
+            log = json.loads(json_log.strip())
 
-    return train_logs, val_logs
+            if "train" in log.values():
+                types_present.add("train_loss")
+
+            if "val" in log.values():
+                if "loss" in log.keys():
+                    types_present.add("val_loss")
+                    continue
+                else:
+                    types_present.add("val_acc")
+
+    return types_present
+
+
+def load_logs(json_log_path, types):
+
+    loaded_logs = {type_name: [] for type_name in types}
+
+    with open(json_log_path, "r") as json_logs:
+        for json_log in json_logs:
+            log = json.loads(json_log.strip())
+
+            if "train" in log.values():
+                loaded_logs["train_loss"].append(log)
+                continue
+
+            if "val" in log.values():
+                if "loss" in log.keys():
+                    loaded_logs["val_loss"].append(log)
+                else:
+                    loaded_logs["val_acc"].append(log)
+
+    return loaded_logs
+
+
+def select_title(json_log_path):
+    log_name = json_log_path.split("/")[-1]
+    title = log_name.split(".")[0]
+    return title
+
+
+def plot_loss(loss_logs, type_name, axs, row_idx):
+    max_iter = max(loss_log["iter"] for loss_log in loss_logs)
+    x_train_loss, y_train_loss = [], []
+    for log_dict in loss_logs:
+        x_train_loss.append(log_dict["iter"] + log_dict["epoch"] * max_iter)
+        y_train_loss.append(log_dict["loss"])
+
+    axs[row_idx].plot(x_train_loss, y_train_loss, marker="o")
+    axs[row_idx].set(xlabel="Iterations")
+    axs[row_idx].set(ylabel=f"{type_name}")
+
+    text = "\n".join((f"Iter/Epoch: {max_iter}",))
+
+    props = dict(boxstyle='round', facecolor='w', alpha=0.8)
+    axs[0].text(0.77, 2.16, text, transform=axs[1].transAxes, fontsize=14,
+                verticalalignment='top', bbox=props)
+
+
+def plot_acc(acc_logs, type_name, axs, row_idx):
+    SELECTED_VALUES = ["bbox_mAP", "bbox_mAP_50", "bbox_mAP_75", "bbox_mAP_m", "bbox_mAP_l"]
+
+    x_val = []
+    y_vals = {name: [] for name in SELECTED_VALUES}
+    for log in acc_logs:
+        x_val.append(log["epoch"])
+        for val_name in SELECTED_VALUES:
+            y_vals[val_name].append(log[val_name])
+
+    for key in y_vals.keys():
+        if key == "bbox_mAP":
+            axs[row_idx].plot(x_val, y_vals[key], marker="o", linewidth=5)
+            continue
+        axs[row_idx].plot(x_val, y_vals[key], marker="o")
+    axs[row_idx].legend(y_vals.keys(), loc="lower right")
+    axs[row_idx].set(ylabel=f"mAP/{type_name}")
+    axs[row_idx].set(xlabel="Epochs")
+
+
+def plot_log_save(json_log_path, output_path=None):
+    type_names = log_types(json_log_path)
+    loaded_logs = load_logs(json_log_path, type_names)
+
+    num_types = len(type_names)
+    fig, axs = plt.subplots(nrows=num_types, ncols=1, figsize=(12, 8))
+    fig.suptitle(f"{select_title(json_log_path)}", fontsize=16)
+
+    row_idx = 0
+    for type_name in type_names:
+        if "loss" in type_name:
+            plot_loss(loaded_logs[type_name], type_name, axs, row_idx)
+            row_idx += 1
+
+        if "acc" in type_name:
+            plot_acc(loaded_logs[type_name], type_name, axs, row_idx)
+
+    for ax in axs:
+        ax.grid()
+
+    if output_path is None:
+        output_path = f"{json_log_path.removesuffix('.json')}.png"
+
+    plt.show()
+    print(f"Saving plot to: {output_path}")
+    plt.savefig(output_path)
+    plt.close()
 
 
 def create_log_plot(train_logs, val_logs, title, out):
@@ -85,19 +177,18 @@ def create_log_plot(train_logs, val_logs, title, out):
     plt.close()
 
 
-def plot_log(log_file_path, title=None, out_file=None):
+def plot_log_old(json_log_path, title=None, out_file=None):
     """
     Plots data from the log of the mmdetection format.
     Args:
-        log_file_path (str): A name of the log file with data.
+        json_log_path (str): A name of the log file with data.
         title (str): A title of the plot.
         out_file (str): A path of the plotted data (must end with .png etc.).
-
     """
 
-    train_logs, val_logs = load_logs(log_file_path)
+    train_logs, val_logs = load_logs(json_log_path)
     if title is None:
-        title = log_file_path.split("/")[-1].removesuffix(".json")
+        title = json_log_path.split("/")[-1].removesuffix(".json")
     create_log_plot(train_logs, val_logs, title, out_file)
 
 
@@ -119,6 +210,6 @@ def plot_all_logs_in_dir(work_dir_path, recursive=False):
                 else:
                     title = file_name.removesuffix(".json")
                 out_file = log_file.removesuffix(".json") + ".png"
-                plot_log(log_file, title, out_file)
+                plot_log_save(log_file, title, out_file)
         if not recursive:
             break
