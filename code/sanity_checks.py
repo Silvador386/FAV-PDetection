@@ -19,11 +19,11 @@ def create_mini_dataset(ann_path, output_path, file_name, num_images):
                  "annotations": [],
                  "categories": categories}
 
-    for _ in range(num_images):
-        img_selected = random.choice(images)
-        coco_json["images"].append(img_selected)
+    selected_images = random.sample(images, num_images)
+    for image in selected_images:
+        coco_json["images"].append(image)
         for ann in annotations:
-            if ann["image_id"] == img_selected["id"]:
+            if ann["image_id"] == image["id"]:
                 coco_json["annotations"].append(ann)
 
     write_to_json(coco_json, f"{output_path}/{file_name}.json")

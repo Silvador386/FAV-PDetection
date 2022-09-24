@@ -18,22 +18,22 @@ def convert_data():
     """
     print("\nConverting...\n")
     # Converts every video to images and every annotation to coco format .json file
-    convert_pdestre_anns(NEW_ANNOTATIONS_FOLDER, NEW_VIDEO_FOLDER,
-                         CONVERTED_ANNOTATIONS_FOLDER, CONVERTED_IMAGE_FOLDER, frame_rate=20)
+    convert_pdestre_anns(NEW_ANNOTATIONS_DIR, NEW_VIDEO_DIR,
+                         CONVERTED_ANNOTATIONS_DIR, CONVERTED_IMAGE_DIR, frame_rate=20)
 
     print("\nMerging...\n")
     # Create pdestre_large
-    train_files, test_files = select_jsons_to_merge(CONVERTED_ANNOTATIONS_FOLDER, num_files=75, shuffle=True, divide=True)
-    merge_json_files(CONVERTED_ANNOTATIONS_FOLDER, train_files,
+    train_files, test_files = select_jsons_to_merge(CONVERTED_ANNOTATIONS_DIR, num_files=75, shuffle=True, divide=True)
+    merge_json_files(CONVERTED_ANNOTATIONS_DIR, train_files,
                      "large_train", "../data/P-DESTRE/coco_format/merged", overwrite=False)
-    merge_json_files(CONVERTED_ANNOTATIONS_FOLDER, test_files,
+    merge_json_files(CONVERTED_ANNOTATIONS_DIR, test_files,
                      "large_test", "../data/P-DESTRE/coco_format/merged", overwrite=False)
 
     # Create pdestre_small
-    train_files, test_files = select_jsons_to_merge(CONVERTED_ANNOTATIONS_FOLDER, num_files=16, shuffle=True, divide=True)
-    merge_json_files(CONVERTED_ANNOTATIONS_FOLDER, train_files,
+    train_files, test_files = select_jsons_to_merge(CONVERTED_ANNOTATIONS_DIR, num_files=16, shuffle=True, divide=True)
+    merge_json_files(CONVERTED_ANNOTATIONS_DIR, train_files,
                      "small_train", "../data/P-DESTRE/coco_format/merged", overwrite=True)
-    merge_json_files(CONVERTED_ANNOTATIONS_FOLDER, test_files,
+    merge_json_files(CONVERTED_ANNOTATIONS_DIR, test_files,
                      "small_test", "../data/P-DESTRE/coco_format/merged", overwrite=True)
 
 
@@ -118,12 +118,12 @@ def test():
             model.show_result(img, result, out_file=out_prefix + f"/{i:05}.jpg")
 
     # Randomly picked images to be shown
-    pdestre_examples = [CONVERTED_IMAGE_FOLDER + "/12-11-2019-2-1_f00160.jpg",
-                        CONVERTED_IMAGE_FOLDER + "/13-11-2019-1-2_f01560.jpg",
-                        CONVERTED_IMAGE_FOLDER + "/10-07-2019-1-1_f00670.jpg",
-                        CONVERTED_IMAGE_FOLDER + "/18-07-2019-1-2_f00280.jpg",
-                        CONVERTED_IMAGE_FOLDER + "/08-11-2019-2-1_f00360.jpg",
-                        CONVERTED_IMAGE_FOLDER + "/08-11-2019-1-2_f01090.jpg"
+    pdestre_examples = [CONVERTED_IMAGE_DIR + "/12-11-2019-2-1_f00160.jpg",
+                        CONVERTED_IMAGE_DIR + "/13-11-2019-1-2_f01560.jpg",
+                        CONVERTED_IMAGE_DIR + "/10-07-2019-1-1_f00670.jpg",
+                        CONVERTED_IMAGE_DIR + "/18-07-2019-1-2_f00280.jpg",
+                        CONVERTED_IMAGE_DIR + "/08-11-2019-2-1_f00360.jpg",
+                        CONVERTED_IMAGE_DIR + "/08-11-2019-1-2_f01090.jpg"
                         ]
 
     for e in pdestre_examples:
@@ -146,7 +146,7 @@ if __name__ == "__main__":
     #                                   "../data/P-DESTRE/coco_format/merged", "debug_trial", 2)
     # main()
     sanity_checks.test_json_anns(ann_path="../data/P-DESTRE/coco_format/merged/micro_train.json",
-                                 img_dir=CONVERTED_IMAGE_FOLDER, output_dir="../results/test_json_anns",
+                                 img_dir=CONVERTED_IMAGE_DIR, output_dir="../results/test_json_anns",
                                  model=None
                                  )
 

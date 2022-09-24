@@ -2,16 +2,16 @@ import json
 import os
 import random
 
-from utils import files_in_folder
+from utils import files_in_folder, write_to_json
 
 
-def select_jsons_to_merge(json_folder, num_files=10, shuffle=False, divide=False):
+def select_jsons_to_merge(json_dir, num_files=10, shuffle=False, divide=False):
     """
     Takes in a folder with .json annotations. Selects files to be merged and returns tuple of train and test
     file names in the ration of 10:1.
 
     Args:
-        json_folder (str): A path of the folder.
+        json_dir (str): A path of the folder.
         num_files (int): The total number of files from which to pick.
         shuffle (bool): If the order of files should be shuffled.
         divide (bool): If false only train files will be picked.
@@ -21,7 +21,7 @@ def select_jsons_to_merge(json_folder, num_files=10, shuffle=False, divide=False
     """
 
     train_filenames, test_filenames = [], []
-    files = files_in_folder(json_folder)
+    files = files_in_folder(json_dir)
 
     if 5 > num_files or num_files > len(files):
         print(f"Number of files changed to maximum ({len(files)}).")
@@ -42,37 +42,36 @@ def select_jsons_to_merge(json_folder, num_files=10, shuffle=False, divide=False
     return train_filenames, test_filenames
 
 
-def merge_json_files(json_folder, json_files, name, output_folder, overwrite=False):
+def merge_json_files(json_dir, json_files, name, output_dir, overwrite=False):
     """
-    Merges all given json files in json_folder to a new json file that is stored in output_folder under the new name.
+    Merges all given json files in json_dir to a new json file that is stored in output_dir under the new name.
 
     Args:
-        json_folder (str): A path of the folder.
+        json_dir (str): A path of the folder.
         json_files (list): A list of selected files to be merged in to a single .json file.
         name (str): A name of the new file.
-        output_folder (str): A path to the folder where the formatted annotation will be stored.
+        output_dir (str): A path to the folder where the formatted annotation will be stored.
         overwrite (bool): Overwrites any pre-existent merged file.
 
     """
-    out_path = output_folder + "/" + name + ".json"
-    result = {}
+    output_path = f"{output_dir}/{name}.json"
+    coco_json = {}
     # Checks if the file already exists
-    if os.path.isfile(out_path) and not overwrite:
-        print(f"{out_path} already exists.")
+    if os.path.isfile(output_path) and not overwrite:
+        print(f"{output_path} already exists.")
         return
 
     for file in json_files:
         if file.endswith(".json") and file != name + ".json":
-            with open(json_folder + "/" + file, "r") as reader:
+            with open(json_dir + "/" + file, "r") as reader:
                 current = json.load(reader)
-                if len(list(result.keys())) == 0:
+                if len(list(coco_json.keys())) == 0:
                     for key in list(current.keys()):
-                        result[key] = []
+                        coco_json[key] = []
                 # for unique values (image, annotations)
                 for var in list(current.keys())[:-1]:
-                    result[var].extend(current[var])
+                    coco_json[var].extend(current[var])
                 # for same values (categories)
-                result["categories"] = current["categories"]
+                coco_json["categories"] = current["categories"]
 
-    with open(out_path, "w") as outfile:
-        json.dump(result, outfile)
+    write_to_json(coco_json, output_path)

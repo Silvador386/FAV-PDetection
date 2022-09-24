@@ -3,16 +3,15 @@
 """     Input and output settings   """
 
 # New dataset
-NEW_ANNOTATIONS_FOLDER = "c:/Programming/Python Projects/FAV_PD/data/P-DESTRE/original/annotation"
-NEW_VIDEO_FOLDER = "c:/Programming/Python Projects/FAV_PD/data/P-DESTRE/original/videos"
-# NEW_IMAGE_FOLDER = ""
+NEW_ANNOTATIONS_DIR = "c:/Programming/Python Projects/FAV_PD/data/P-DESTRE/original/annotation"
+NEW_VIDEO_DIR = "c:/Programming/Python Projects/FAV_PD/data/P-DESTRE/original/videos"
 
-NEW_ANNOTATION_TYPE = ".txt"
-NEW_VIDEO_TYPE = ".MP4"
+NEW_ANNOTATION_TYPE = "txt"
+NEW_VIDEO_TYPE = "MP4"
 
 # Converted dataset location folder
-CONVERTED_ANNOTATIONS_FOLDER = "c:/Programming/Python Projects/FAV_PD/data/P-DESTRE/coco_format/annotations"
-CONVERTED_IMAGE_FOLDER = "c:/Programming/Python Projects/FAV_PD/data/P-DESTRE/coco_format/videos"
+CONVERTED_ANNOTATIONS_DIR = "c:/Programming/Python Projects/FAV_PD/data/P-DESTRE/coco_format/annotations"
+CONVERTED_IMAGE_DIR = "c:/Programming/Python Projects/FAV_PD/data/P-DESTRE/coco_format/videos"
 
 
 # Defaults
