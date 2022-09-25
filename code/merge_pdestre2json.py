@@ -21,18 +21,18 @@ def select_jsons_to_merge(json_dir, num_files=10, shuffle=False, divide=False):
     """
 
     train_filenames, test_filenames = [], []
-    files = files_in_folder(json_dir)
+    json_files = files_in_folder(json_dir)
 
-    if 5 > num_files or num_files > len(files):
-        print(f"Number of files changed to maximum ({len(files)}).")
-        num_files = len(files)
+    if 5 > num_files or num_files > len(json_files):
+        print(f"Number of files changed to maximum ({len(json_files)}).")
+        num_files = len(json_files)
 
     for i in range(num_files):
         if not shuffle:
-            file = files.pop()
+            file = json_files.pop()
         else:
-            file = random.choice(files)
-            files.remove(file)
+            file = random.choice(json_files)
+            json_files.remove(file)
 
         if divide and i < num_files / 10:  # Picks test data
             test_filenames.append(file)

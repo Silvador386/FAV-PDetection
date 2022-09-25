@@ -11,7 +11,7 @@ from pdestre_conversion import *
 from settings import *
 
 
-def convert_data():
+def convert_and_merge_data():
     """
     Converts P-DESTRE dataset by converting videos to images and text annotations to coco formatted .json files.
     Then the annotations are merged into large and small variant of train and test datasets.
@@ -150,7 +150,8 @@ if __name__ == "__main__":
     #                              model=None
     #                              )
 
-    plot_logs.plot_log_save("./work_dirs/main_config/20220923_172713.log.json")
+    # plot_logs.plot_log_save("./work_dirs/main_config/20220923_172713.log.json")
+    plot_logs.plot_all_logs_in_dir("./work_dirs/main_config")
 
     """ Using built-in commands shortcut """
     # os.system("python ../tools/train.py ../configs/my_config/main_config.py")
