@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 
 
 def log_types(json_log_path):
+    TYPES_ORDERED = ["train_loss", "val_loss", "val_acc"]
     types_present = set()
     with open(json_log_path, "r") as json_logs:
         for json_log in json_logs:
@@ -19,7 +20,7 @@ def log_types(json_log_path):
                 else:
                     types_present.add("val_acc")
 
-    return types_present
+    return [type_present for type_present in TYPES_ORDERED if type_present in types_present]
 
 
 def load_logs(json_log_path, types):
@@ -65,7 +66,7 @@ def plot_loss(loss_logs, type_name, subplot):
     text = "\n".join((f"Iter/Epoch: {max_iter}",))
 
     props = dict(boxstyle='round', facecolor='w', alpha=0.8)
-    subplot.text(0.77, 2.16, text, transform=subplot.transAxes, fontsize=14,
+    subplot.text(0.85, 0.9, text, transform=subplot.transAxes, fontsize=14,
                  verticalalignment='top', bbox=props)
 
 
@@ -101,7 +102,7 @@ def plot_log_save(json_log_path, output_path=None):
     fig.suptitle(f"{select_title(json_log_path)}", fontsize=16)
 
     row_idx = 0
-    for type_name in sorted(type_names):
+    for type_name in type_names:
         subplot = axs[row_idx, 0]
         subplot.grid()
         if "loss" in type_name:

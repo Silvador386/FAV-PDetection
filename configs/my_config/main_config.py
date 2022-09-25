@@ -39,7 +39,7 @@ model = dict(
             in_channels=256,
             fc_out_channels=1024,
             roi_feat_size=7,
-            num_classes=1,
+            num_classes=_num_classes,
             bbox_coder=dict(
                 type='DeltaXYWHBBoxCoder',
                 target_means=[0., 0., 0., 0.],
@@ -63,7 +63,7 @@ runner = dict(type='EpochBasedRunner', max_epochs=50)
 
 checkpoint_config = dict(interval=10)
 log_config = dict(
-    interval=2,
+    interval=1,
     hooks=[
         dict(type='TextLoggerHook'),
         # dict(type='TensorboardLoggerHook')

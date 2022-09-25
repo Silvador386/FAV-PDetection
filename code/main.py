@@ -136,24 +136,22 @@ def main():
     # convert_video_to_jpg("video_20220603-1218", "../data/city/video_20220603-1218.mp4", "../Datasets/city/images")
     # prepare_data()
     # train()
-    test()
+    # test()
+
+    """ Testing sanity-checks, """
+    # sanity_checks.create_mini_dataset("../data/P-DESTRE/coco_format/merged/large_train.json",
+    #                                   "../data/P-DESTRE/coco_format/merged", "debug_trial", 2)
+
+    """ Current pipeline """
+    os.system("python ../tools/train.py ../configs/my_config/main_config.py")
+    plot_logs.plot_all_logs_in_dir("./work_dirs/main_config")
+    sanity_checks.test_json_anns(ann_path="../data/P-DESTRE/coco_format/merged/micro_train.json",
+                                 img_dir=CONVERTED_IMAGE_DIR, output_dir="../results/test_json_anns",
+                                 model=None
+                                 )
+    os.system("python ../tools/test.py ../configs/my_config/main_config.py work_dirs/main_config/latest.pth --show")
 
 
 if __name__ == "__main__":
-    """ Testing sanity-checks, """
-
-    # sanity_checks.create_mini_dataset("../data/P-DESTRE/coco_format/merged/large_train.json",
-    #                                   "../data/P-DESTRE/coco_format/merged", "debug_trial", 2)
-    # main()
-    # sanity_checks.test_json_anns(ann_path="../data/P-DESTRE/coco_format/merged/micro_train.json",
-    #                              img_dir=CONVERTED_IMAGE_DIR, output_dir="../results/test_json_anns",
-    #                              model=None
-    #                              )
-
-    # plot_logs.plot_log_save("./work_dirs/main_config/20220923_172713.log.json")
-    plot_logs.plot_all_logs_in_dir("./work_dirs/main_config")
-
-    """ Using built-in commands shortcut """
-    # os.system("python ../tools/train.py ../configs/my_config/main_config.py")
-    # os.system("python ../tools/test.py ../configs/my_config/main_config.py work_dirs/main_config/latest.pth --show")
+    main()
 
