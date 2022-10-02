@@ -9,6 +9,7 @@ import sanity_checks
 from merge_pdestre2json import select_jsons_to_merge, merge_json_files
 from pdestre_conversion import *
 from settings import *
+from train import TrainManager
 
 
 def convert_and_merge_data():
@@ -35,50 +36,6 @@ def convert_and_merge_data():
                      "small_train", "../data/P-DESTRE/coco_format/merged", overwrite=True)
     merge_json_files(CONVERTED_ANNOTATIONS_DIR, test_files,
                      "small_test", "../data/P-DESTRE/coco_format/merged", overwrite=True)
-
-
-def train(create_params=False):
-    """
-    Retrains an pre-existed object detection model and outputs the checkpoints and logs into "train_exports" directory.
-    Builds a train dataset from cfg.data.train. Plots the train loss of train epochs and mAP of the validation epochs.
-
-    Args:
-        create_params (bool): Creates a combination of multiple params which are used to gradually
-                              multiple models.
-
-    Results are stored in train_exports directory.
-    """
-    from unused.org_config import cfg
-
-    datasets = [build_dataset(cfg.data.train)]  # mmdet/datasets/ utils.py - change __check_head
-
-    learning_rates = [0.00016]
-    # weight_decays = [5.8e-3]
-    weight_decays = [0]
-    if create_params:
-        learning_rates = [random.uniform(0.0004, 0.00001) for _ in range(3)]
-        weight_decays = [random.uniform(0.01, 0.00001) for _ in range(6)]
-
-    train_combinations = list(itertools.product(learning_rates, weight_decays))
-
-    for i, (learning_rate, weight_decay) in enumerate(train_combinations):
-        print(f"Learning rate: {learning_rate}\nWeight decay: {weight_decay}")
-        # cfg.load_from = "../checkpoints/results/favorites/s32_e2_lr_1,3e4/latest.pth"
-        # cfg.optimizer = dict(type='SGD', lr=learning_rate, momentum=0.9, weight_decay=weight_decay)
-        # cfg.optimizer_config = dict(grad_clip=None)
-        # cfg.lr_config = dict(
-        #     policy='step',
-        #     warmup='linear',
-        #     warmup_iters=500,
-        #     warmup_ratio=0.001,
-        #     step=[7])
-        # cfg.work_dir_path = f"./train_exports/lr{learning_rate:.1e}_wd{weight_decay:.1e}"
-
-        model = build_detector(cfg.model, train_cfg=cfg.get('train_cfg'), test_cfg=cfg.get('test_cfg'))
-        model.CLASSES = ("person", )
-
-        train_detector(model, datasets, cfg, distributed=False, validate=True)
-        plot_logs.plot_all_logs_in_dir("train_exports", recursive=False)
 
 
 def test():
@@ -133,26 +90,18 @@ def test():
 
 
 def main():
-    # convert_video_to_jpg("video_20220603-1218", "../data/city/video_20220603-1218.mp4", "../Datasets/city/images")
-    # prepare_data()
-    # train()
-    # test()
-
     """ Testing sanity-checks, """
     # sanity_checks.create_mini_dataset("../data/P-DESTRE/coco_format/merged/large_train.json",
     #                                   "../data/P-DESTRE/coco_format/merged", "debug_trial", 2)
 
     """ Current pipeline """
-    os.system("python ../tools/train.py ../configs/my_config/main_config.py")
-    plot_logs.plot_all_logs_in_dir("./work_dirs/main_config")
-    sanity_checks.test_json_anns(ann_path="../data/P-DESTRE/coco_format/merged/micro_train.json",
-                                 img_dir=CONVERTED_IMAGE_DIR, output_dir="../results/test_json_anns",
-                                 model=None
-                                 )
+    config_path = "../configs/my_config/main_config.py"
+    work_dir = "./work_dirs/main_config"
+    tm = TrainManager(config_path)
+    tm.train()
+
     # os.system("python ../tools/test.py ../configs/my_config/main_config.py work_dirs/main_config/latest.pth --show")
 
 
 if __name__ == "__main__":
-    # main()
-    from train import train_manager
-    train_manager()
+    main()

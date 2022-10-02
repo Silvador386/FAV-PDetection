@@ -111,7 +111,7 @@ model = dict(
 
 evaluation = dict(metric="bbox", save_best="auto")
 
-optimizer = dict(type='SGD', lr=0.007/8, momentum=0.9, weight_decay=0.00000)
+optimizer = dict(type='SGD', lr=0.008/8, momentum=0.9, weight_decay=0.0001)
 optimizer_config = dict(grad_clip=None)
 # learning policy
 lr_config = dict(
@@ -119,7 +119,7 @@ lr_config = dict(
     warmup='linear',
     warmup_iters=10,
     warmup_ratio=0.01,
-    step=[30, 40])
+    step=[20])
 
 # lr_config = dict(
 #     _delete_=True,
@@ -132,7 +132,7 @@ lr_config = dict(
 #     step_ratio_up=0.4,
 # )
 
-runner = dict(type='EpochBasedRunner', max_epochs=50)
+runner = dict(type='EpochBasedRunner', max_epochs=40)
 
 checkpoint_config = dict(interval=10)
 log_config = dict(
@@ -144,5 +144,5 @@ log_config = dict(
 
 workflow = [("train", 1), ("val", 1)]
 
-# resume_from = "c:/Programming/Python Projects/FAV_PD/code/work_dirs/main_config/latest.pth"
-load_from = "c:/Programming/Python Projects/FAV_PD/checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth"
+load_from = "c:/Programming/Python Projects/FAV_PD/code/work_dirs/main_config/latest.pth"
+# load_from = "c:/Programming/Python Projects/FAV_PD/checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth"
