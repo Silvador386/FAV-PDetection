@@ -41,7 +41,7 @@ cfg.model.roi_head.bbox_head.num_classes = 1
 
 cfg.load_from = "../checkpoints/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth"
 # cfg.load_from = "../checkpoints/results/favorites/s32_e2_lr1,6e4/latest.pth
-cfg.work_dir = "./train_exports"
+cfg.work_dir = "../train_exports"
 
 cfg.optimizer = dict(type='SGD', lr=0.0016, momentum=0.9, weight_decay=0.0000)
 # cfg.optimizer_config = dict(grad_clip=None)

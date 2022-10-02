@@ -48,7 +48,7 @@ def train(create_params=False):
 
     Results are stored in train_exports directory.
     """
-    from org_config import cfg
+    from unused.org_config import cfg
 
     datasets = [build_dataset(cfg.data.train)]  # mmdet/datasets/ utils.py - change __check_head
 
@@ -96,7 +96,7 @@ def test():
     # Test current model
     # config_file = cfg
     config_file = "../configs/my_config/main_config.py"
-    checkpoint_file = "../work_dirs/main_config/epoch_7.pth"
+    checkpoint_file = "work_dirs/main_config/latest.pth"
     out_prefix = "../results/pdestre"
 
     model = init_detector(config_file, checkpoint_file, device='cuda:0')
@@ -149,9 +149,10 @@ def main():
                                  img_dir=CONVERTED_IMAGE_DIR, output_dir="../results/test_json_anns",
                                  model=None
                                  )
-    os.system("python ../tools/test.py ../configs/my_config/main_config.py work_dirs/main_config/latest.pth --show")
+    # os.system("python ../tools/test.py ../configs/my_config/main_config.py work_dirs/main_config/latest.pth --show")
 
 
 if __name__ == "__main__":
-    main()
-
+    # main()
+    from train import train_manager
+    train_manager()
