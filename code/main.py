@@ -97,8 +97,8 @@ def main():
     """ Current pipeline """
     config_path = "../configs/my_config/main_config.py"
     work_dir = "./work_dirs/main_config"
-    tm = TrainManager(config_path)
-    tm.train()
+    trainer = TrainManager(config_path)
+    trainer.train(work_dir)
 
     # os.system("python ../tools/test.py ../configs/my_config/main_config.py work_dirs/main_config/latest.pth --show")
 
