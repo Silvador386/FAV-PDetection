@@ -134,4 +134,4 @@ def old_train(create_params=False):
         model.CLASSES = ("person", )
 
         train_detector(model, datasets, cfg, distributed=False, validate=True)
-        plot_logs.plot_all_logs_in_dir("train_exports", recursive=False)
+        plot_logs.plot_all_logs_in_dir("../workdirs/train_exports", recursive=False)

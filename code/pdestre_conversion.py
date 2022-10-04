@@ -14,7 +14,6 @@ class Vid2ImgConverter:
         self.img_idx = 0
 
     def create_next_annotated_image(self, img_name, img_path, image_id, frame_idx):
-        read_error = False
         # Checks if the image already exists
         if not os.path.isfile(img_path):
             # Create the current image
@@ -22,8 +21,7 @@ class Vid2ImgConverter:
                 success, image = self.vidcap.read()
                 if not success:
                     print(f"vidcap.read() not successful!\n Filename: {img_path}")
-                    read_error = True
-                    break
+                    raise IOError(f"vidcap.read() not successful!\n Filename: {img_path}")
                 self.img_idx += 1
                 if self.img_idx == frame_idx:
                     cv2.imwrite(img_path, image)  # save frame as JPEG file
@@ -33,8 +31,6 @@ class Vid2ImgConverter:
         width, height = image.shape[:2]
         image_info = dict(file_name=img_name, width=width, height=height, id=image_id)
         self.coco_json["images"].append(image_info)
-
-        return read_error
 
 
 def load_anns_vidcap(ann_path, video_path):
@@ -90,9 +86,11 @@ def pdestre_anns_to_coco(ann_path, video_path, file_name, output_folder, image_f
                 img_name = file_name + f"_f{frame_idx:05}.jpg"
                 img_file_name = image_folder + "/" + img_name
 
-                read_error = img_convertor.create_next_annotated_image(img_name, img_file_name, image_id, frame_idx)
-                if read_error:
+                try:
+                    img_convertor.create_next_annotated_image(img_name, img_file_name, image_id, frame_idx)
+                except IOError:
                     continue
+
                 previous_frame_idx = frame_idx
 
                 # # Checks if the image already exists
