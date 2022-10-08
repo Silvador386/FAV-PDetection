@@ -59,6 +59,10 @@ def dict_generator(indict, previous=None):
         yield previous + [indict]
 
 
+def generate_lr_wd_combs():
+    pass
+
+
 def user_defined_train(config_path, **kwargs):
     cfg = Config.fromfile(config_path)
     set_cfg_gpu(cfg)

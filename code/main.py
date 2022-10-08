@@ -52,8 +52,8 @@ def test():
 
     # Test current model
     # config_file = cfg
-    config_file = "../configs/my_config/main_config.py"
-    checkpoint_file = "work_dirs/main_config/latest.pth"
+    config_file = "../configs/my_config/use_latest_config.py"
+    checkpoint_file = "../checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth"
     out_prefix = "../results/pdestre"
 
     model = init_detector(config_file, checkpoint_file, device='cuda:0')
@@ -100,7 +100,8 @@ def main():
     trainer = TrainManager(config_path)
     trainer.train(work_dir)
 
-    # os.system("python ../tools/test.py ../configs/my_config/main_config.py work_dirs/main_config/latest.pth --show")
+    # test()
+    # os.system("python ../tools/test.py ../configs/my_config/use_latest_config.py ../checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth --eval bbox --show")
 
 
 if __name__ == "__main__":
