@@ -95,12 +95,14 @@ def main():
 
     """ Current pipeline """
     config_path = "../configs/my_config/main_config.py"
-    work_dir = "./work_dirs/main_config"
+    work_dir = "./work_dirs/main_config_clc_loss"
     trainer = TrainManager(config_path, work_dir)
-    trainer.train()
+    trainer.train(create_opts=True)
 
     # test()
-    # os.system("python ../tools/test.py ../configs/my_config/use_latest_config.py ../checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth --eval bbox --show")
+    # os.system("python ../tools/test.py ../configs/my_config/original_model.py"
+    #           " ../checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth"
+              # " --eval bbox")
 
 
 if __name__ == "__main__":

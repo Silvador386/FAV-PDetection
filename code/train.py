@@ -17,8 +17,8 @@ class TrainManager:
         self.work_dir = work_dir
         self.options = []
 
-    def train(self, create_opt=False, **kwargs):
-        if create_opt:
+    def train(self, create_opts=False, **kwargs):
+        if create_opts:
             self.create_lr_wd_combs()
             for option in self.options:
                 kwargs.update(option)
@@ -31,18 +31,18 @@ class TrainManager:
 
         plot_logs.plot_all_logs_in_dir(self.work_dir)
 
-        model = init_detector(self.config_path, DEFAULT_CHECKPOINT_LATEST, device='cuda:0')
-        sanity_checks.test_json_anns(ann_path="../data/P-DESTRE/coco_format/merged/micro_train.json",
-                                     img_dir=CONVERTED_IMAGE_DIR, output_dir="../results/test_json_anns",
-                                     model=model
-                                     )
+        # model = init_detector(self.config_path, checkpoint="./work_dirs/main_config_clc_loss", device='cuda:0')
+        # sanity_checks.test_json_anns(ann_path="../data/P-DESTRE/coco_format/merged/micro_train.json",
+        #                              img_dir=CONVERTED_IMAGE_DIR, output_dir="../results/test_json_anns",
+        #                              model=model
+        #                              )
 
     def create_lr_wd_combs(self):
-        learning_rates = generate_uniform_values(0.2, 0.002, 5)
-        weight_decays = generate_uniform_values(0.001, 0, 5)
+        learning_rates = generate_uniform_values(0.2/8, 0.002/8, 8)
+        weight_decays = generate_uniform_values(0.0001, 0, 2)
         combs = list(product(learning_rates, weight_decays))
         for lr, wd in combs:
-            self.options += dict(optimizer=dict(type='SGD', lr=lr, momentum=0.9, weight_decay=wd))
+            self.options.append(dict(optimizer=dict(type='SGD', lr=lr, momentum=0.9, weight_decay=wd)))
 
 
 def built_in_train(config_path, work_dir, **optional_args):

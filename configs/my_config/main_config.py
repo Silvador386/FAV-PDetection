@@ -135,7 +135,7 @@ lr_config = dict(
     warmup='linear',
     warmup_iters=5,
     warmup_ratio=0.01,
-    step=[20, 30])
+    step=[15, 23])
 
 # lr_config = dict(
 #     _delete_=True,
@@ -148,7 +148,7 @@ lr_config = dict(
 #     step_ratio_up=0.4,
 # )
 
-runner = dict(type='EpochBasedRunner', max_epochs=40)
+runner = dict(type='EpochBasedRunner', max_epochs=30)
 
 checkpoint_config = dict(interval=10)
 log_config = dict(
@@ -160,5 +160,5 @@ log_config = dict(
 
 workflow = [("train", 1), ("val", 1)]
 
-load_from = "c:/Programming/Python Projects/FAV_PD/code/work_dirs/main_config/latest.pth"
-# load_from = "c:/Programming/Python Projects/FAV_PD/checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth"
+# load_from = "c:/Programming/Python Projects/FAV_PD/code/work_dirs/main_config/latest.pth"
+load_from = "c:/Programming/Python Projects/FAV_PD/checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth"
