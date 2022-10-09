@@ -1,31 +1,51 @@
 import random
+from itertools import product
 from mmdet.datasets import build_dataset
 from mmdet.models import build_detector
 from mmdet.apis import init_detector, train_detector, inference_detector, show_result_pyplot, set_random_seed
 from mmcv import Config
+from tools import train as mmdet_train
 
 import plot_logs
 import sanity_checks
-from merge_pdestre2json import select_jsons_to_merge, merge_json_files
-from pdestre_conversion import *
 from settings import *
 
 
 class TrainManager:
-    def __init__(self, config_path):
+    def __init__(self, config_path, work_dir):
         self.config_path = config_path
+        self.work_dir = work_dir
+        self.options = []
 
-    def train(self, work_dir=None, **kwargs):
-        built_in_train(self.config_path, work_dir, **kwargs)
-        plot_logs.plot_all_logs_in_dir("./work_dirs/main_config")
+    def train(self, create_opt=False, **kwargs):
+        if create_opt:
+            self.create_lr_wd_combs()
+            for option in self.options:
+                kwargs.update(option)
+                self.train_pipeline(**kwargs)
+        else:
+            self.train_pipeline(**kwargs)
+
+    def train_pipeline(self, **kwargs):
+        built_in_train(self.config_path, self.work_dir, **kwargs)
+
+        plot_logs.plot_all_logs_in_dir(self.work_dir)
+
+        model = init_detector(self.config_path, DEFAULT_CHECKPOINT_LATEST, device='cuda:0')
         sanity_checks.test_json_anns(ann_path="../data/P-DESTRE/coco_format/merged/micro_train.json",
                                      img_dir=CONVERTED_IMAGE_DIR, output_dir="../results/test_json_anns",
-                                     model=None
+                                     model=model
                                      )
+
+    def create_lr_wd_combs(self):
+        learning_rates = generate_uniform_values(0.2, 0.002, 5)
+        weight_decays = generate_uniform_values(0.001, 0, 5)
+        combs = list(product(learning_rates, weight_decays))
+        for lr, wd in combs:
+            self.options += dict(optimizer=dict(type='SGD', lr=lr, momentum=0.9, weight_decay=wd))
 
 
 def built_in_train(config_path, work_dir, **optional_args):
-    from tools import train as base_train
     train_args = [config_path]
     if work_dir:
         train_args += ["--work-dir", work_dir]
@@ -35,10 +55,9 @@ def built_in_train(config_path, work_dir, **optional_args):
             print(listed_config_option)
             config_option_to_change = f"{'.'.join(listed_config_option[:-1])}={listed_config_option[-1]}"
             additional_options.append(config_option_to_change)
-        else:
-            train_args += additional_options
+        train_args += additional_options
 
-    base_train.main(train_args)
+    mmdet_train.main(train_args)
 
 
 def dict_generator(indict, previous=None):
@@ -59,8 +78,9 @@ def dict_generator(indict, previous=None):
         yield previous + [indict]
 
 
-def generate_lr_wd_combs():
-    pass
+def generate_uniform_values(max_value, min_value, n):
+    values = [random.uniform(min_value, max_value) for _ in range(n)]
+    return values
 
 
 def user_defined_train(config_path, **kwargs):

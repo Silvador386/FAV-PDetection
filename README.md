@@ -1,6 +1,7 @@
 # FAV - Pedestrian detection project
 * This project aims for better object detection of pedestrians from elevated camara views of public transport stations.
 * Python version: 3.9.8
+* It is required to clone [MMDetection](https://github.com/open-mmlab/mmdetection) repository into the project directory to function properly.
 # TODO
 1. ~~Search for appropriate datasets.~~
 2. Build train and test pipeline to retrain an existing R-CNN model (MMDetection: https://github.com/open-mmlab/mmdetection).
@@ -11,6 +12,7 @@
 
 
 ## Datasets
+Currently, the P-DESTRE dataset is used.
 
 1. [Mall Dataset](http://personal.ie.cuhk.edu.hk/~ccloy/downloads_mall_dataset.html)
    * Availability: Downloadable, Requirements: **Only for research purposes**, can not be use commercially, cite.

@@ -40,26 +40,25 @@ def convert_and_merge_data():
 
 def test():
     """
-    Tests current model on the control data (images of pre-selected video and randomly chose images from the dataset).
+    Tests current model on the station_control data (images of pre-selected video and randomly chose images from the dataset).
     The interference is stored in the "out_prefix" folder.
 
     """
 
     # Control - original model
-    # config_file = '../configs/faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py'
-    # checkpoint_file = '../checkpoints/faster_rcnn_r50_fpn_1x_coco_20200130-047c8118.pth'
-    # out_prefix = "../results/control"
+    config_file = '../configs/faster_rcnn/faster_rcnn_r50_fpn_2x_coco.py'
+    checkpoint_file = "../checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth"
+    out_prefix = "../results/station_BasicFasterRCNN"
 
     # Test current model
-    # config_file = cfg
-    config_file = "../configs/my_config/use_latest_config.py"
-    checkpoint_file = "../checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth"
-    out_prefix = "../results/pdestre"
+    # config_file = "../configs/my_config/main_config_large.py"
+    # checkpoint_file = "../checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth"
+    # out_prefix = "../results/station_BasicFasterRCNN"
 
     model = init_detector(config_file, checkpoint_file, device='cuda:0')
-    test_img_prefix = "../data/city/images"
+    img_prefix = "../data/city/images"
 
-    image_names = files_in_folder(test_img_prefix)
+    image_names = files_in_folder(img_prefix)
 
     # For parts where the tram is present.
     finer_zones = [(200, 300), (1400, 1480)]
@@ -68,9 +67,9 @@ def test():
     for i, image_name in enumerate(image_names):
         image_rate = 20
         if any([zone[0] < i < zone[1] for zone in finer_zones]):
-            image_rate = 4
+            image_rate = 2
         if i % image_rate == 0:
-            img = mmcv.imread(test_img_prefix + "/" + image_name)
+            img = mmcv.imread(img_prefix + "/" + image_name)
             result = inference_detector(model, img)
             model.show_result(img, result, out_file=out_prefix + f"/{i:05}.jpg")
 
@@ -97,8 +96,8 @@ def main():
     """ Current pipeline """
     config_path = "../configs/my_config/main_config.py"
     work_dir = "./work_dirs/main_config"
-    trainer = TrainManager(config_path)
-    trainer.train(work_dir)
+    trainer = TrainManager(config_path, work_dir)
+    trainer.train()
 
     # test()
     # os.system("python ../tools/test.py ../configs/my_config/use_latest_config.py ../checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth --eval bbox --show")
