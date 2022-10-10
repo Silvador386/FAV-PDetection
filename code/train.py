@@ -1,4 +1,5 @@
 import random
+import os
 from itertools import product
 from mmdet.datasets import build_dataset
 from mmdet.models import build_detector
@@ -31,14 +32,14 @@ class TrainManager:
 
         plot_logs.plot_all_logs_in_dir(self.work_dir)
 
-        # model = init_detector(self.config_path, checkpoint="./work_dirs/main_config_clc_loss", device='cuda:0')
-        # sanity_checks.test_json_anns(ann_path="../data/P-DESTRE/coco_format/merged/micro_train.json",
-        #                              img_dir=CONVERTED_IMAGE_DIR, output_dir="../results/test_json_anns",
-        #                              model=model
-        #                              )
+        model = init_detector(self.config_path,
+                              checkpoint="./work_dirs/main_config_clc_loss/latest.pth", device='cuda:0')
+        sanity_checks.test_json_anns(ann_path="../data/P-DESTRE/coco_format/merged/micro_train.json",
+                                     img_dir=CONVERTED_IMAGE_DIR, output_dir="../results/test_json_anns",
+                                     model=model)
 
     def create_lr_wd_combs(self):
-        learning_rates = generate_uniform_values(0.2/8, 0.002/8, 8)
+        learning_rates = generate_uniform_values(0.01, 0.001, 8)
         weight_decays = generate_uniform_values(0.0001, 0, 2)
         combs = list(product(learning_rates, weight_decays))
         for lr, wd in combs:
@@ -57,8 +58,11 @@ def built_in_train(config_path, work_dir, **optional_args):
             additional_options.append(config_option_to_change)
         train_args += additional_options
 
-    mmdet_train.main(train_args)
-
+    if mmdet_train.main.__code__.co_argcount > 0:
+        mmdet_train.main(train_args)
+    else:
+        run_arg = f"python ../tools/train.py {' '.join(train_args)}"
+        os.system(run_arg)
 
 def dict_generator(indict, previous=None):
     """Recursively generates listed data from the nested data structure."""
@@ -78,7 +82,9 @@ def dict_generator(indict, previous=None):
         yield previous + [indict]
 
 
-def generate_uniform_values(max_value, min_value, n):
+def generate_uniform_values(max_value, min_value, n) -> list:
+    if n <= 1:
+        return [min_value]
     values = [random.uniform(min_value, max_value) for _ in range(n)]
     return values
 
