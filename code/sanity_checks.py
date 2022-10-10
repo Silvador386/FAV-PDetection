@@ -54,6 +54,21 @@ def test_rect_anns(ann_path, img_dir, output_dir, max_num=-1):
             break
 
 
+def resize_imgs(ann_path, img_dir, output_dir, size=(1300, 800)):
+    images, annotations, _ = load_ann_data(ann_path)
+
+    for i, image in enumerate(images):
+        img_name = image["file_name"]
+        img = cv2.imread(img_dir + "/" + img_name)
+
+        resized = cv2.resize(img, size)
+
+        if output_dir is not None:
+            output_path = f"{output_dir}/resized_{img_name}"
+            print(f"Writing to: {output_path}")
+            cv2.imwrite(output_path, resized)
+
+
 def test_image_inference(ann_path, img_folder_path, model, output_dir, max_num=-1):
     import mmcv
     from mmdet.apis import init_detector, inference_detector, show_result_pyplot
