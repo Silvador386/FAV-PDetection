@@ -12,7 +12,7 @@ from settings import *
 from train import TrainManager
 
 
-def convert_and_merge_data():
+def convert_and_merge_PDdata():
     """
     Converts P-DESTRE dataset by converting videos to images and text annotations to coco formatted .json files.
     Then the annotations are merged into large and small variant of train and test datasets.
@@ -46,14 +46,15 @@ def test():
     """
 
     # Control - original model
-    config_file = '../configs/faster_rcnn/faster_rcnn_r50_fpn_2x_coco.py'
-    checkpoint_file = "../checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth"
-    out_prefix = "../results/station_BasicFasterRCNN"
-
-    # Test current model
-    # config_file = "../configs/my_config/main_config_large.py"
+    # config_file = '../configs/faster_rcnn/faster_rcnn_r50_fpn_2x_coco.py'
     # checkpoint_file = "../checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth"
     # out_prefix = "../results/station_BasicFasterRCNN"
+
+    # Test current model
+    config_file = "../configs/my_config/main_config_large.py"
+    # checkpoint_file = "../checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth"
+    checkpoint_file = "./work_dirs/main_config_clc_loss/latest.pth"
+    out_prefix = "../results/station_pdestre"
 
     model = init_detector(config_file, checkpoint_file, device='cuda:0')
     img_prefix = "../data/city/images"
@@ -74,18 +75,18 @@ def test():
             model.show_result(img, result, out_file=out_prefix + f"/{i:05}.jpg")
 
     # Randomly picked images to be shown
-    pdestre_examples = [CONVERTED_IMAGE_DIR + "/12-11-2019-2-1_f00160.jpg",
-                        CONVERTED_IMAGE_DIR + "/13-11-2019-1-2_f01560.jpg",
-                        CONVERTED_IMAGE_DIR + "/10-07-2019-1-1_f00670.jpg",
-                        CONVERTED_IMAGE_DIR + "/18-07-2019-1-2_f00280.jpg",
-                        CONVERTED_IMAGE_DIR + "/08-11-2019-2-1_f00360.jpg",
-                        CONVERTED_IMAGE_DIR + "/08-11-2019-1-2_f01090.jpg"
-                        ]
-
-    for e in pdestre_examples:
-        img = mmcv.imread(e)
-        result = inference_detector(model, img)
-        show_result_pyplot(model, img, result)
+    # pdestre_examples = [CONVERTED_IMAGE_DIR + "/12-11-2019-2-1_f00160.jpg",
+    #                     CONVERTED_IMAGE_DIR + "/13-11-2019-1-2_f01560.jpg",
+    #                     CONVERTED_IMAGE_DIR + "/10-07-2019-1-1_f00670.jpg",
+    #                     CONVERTED_IMAGE_DIR + "/18-07-2019-1-2_f00280.jpg",
+    #                     CONVERTED_IMAGE_DIR + "/08-11-2019-2-1_f00360.jpg",
+    #                     CONVERTED_IMAGE_DIR + "/08-11-2019-1-2_f01090.jpg"
+    #                     ]
+    #
+    # for e in pdestre_examples:
+    #     img = mmcv.imread(e)
+    #     result = inference_detector(model, img)
+    #     show_result_pyplot(model, img, result)
 
 
 def main():
@@ -97,12 +98,15 @@ def main():
     config_path = "../configs/my_config/main_config.py"
     work_dir = "./work_dirs/main_config_clc_loss"
     trainer = TrainManager(config_path, work_dir)
-    trainer.train(create_opts=True)
+    trainer.train(create_opts=False)
+
 
     # test()
-    # os.system("python ../tools/test.py ../configs/my_config/original_model.py"
-    #           " ../checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth"
-              # " --eval bbox")
+    # os.system("python ../tools/test.py ../configs/my_config/original_model.py "
+    #           "../checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth "
+    #           "--eval bbox "
+    #           "--show"
+    #           )
 
 
 if __name__ == "__main__":

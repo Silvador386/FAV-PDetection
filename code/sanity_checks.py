@@ -29,7 +29,7 @@ def create_mini_dataset(ann_path, output_path, file_name, num_images):
     write_to_json(coco_json, f"{output_path}/{file_name}.json")
 
 
-def test_rect_anns(ann_path, img_dir, output_dir, max_num=-1):
+def test_rect_anns(ann_path, img_dir, output_dir, max_num=-1, resize=False):
 
     images, annotations, _ = load_ann_data(ann_path)
 
@@ -46,7 +46,11 @@ def test_rect_anns(ann_path, img_dir, output_dir, max_num=-1):
                 img = cv2.rectangle(img, bottom_left_corner, upper_right_corner, (0, 0, 255), 2)
 
         if output_dir is not None:
-            output_path = f"{output_dir}/rect_{img_name}"
+            if resize:
+                img = cv2.resize(img, [1333, 800])
+                output_path = f"{output_dir}/resized_{img_name}"
+            else:
+                output_path = f"{output_dir}/rect_{img_name}"
             print(f"Writing to: {output_path}")
             cv2.imwrite(output_path, img)
 

@@ -1,10 +1,10 @@
 import random
 import os
 from itertools import product
+
 from mmdet.datasets import build_dataset
 from mmdet.models import build_detector
 from mmdet.apis import init_detector, train_detector, inference_detector, show_result_pyplot, set_random_seed
-from mmcv import Config
 from tools import train as mmdet_train
 
 import plot_logs
@@ -19,28 +19,32 @@ class TrainManager:
         self.options = []
 
     def train(self, create_opts=False, **kwargs):
+        # train multiple times, with different options
         if create_opts:
             self.create_lr_wd_combs()
             for option in self.options:
                 kwargs.update(option)
                 self.train_pipeline(**kwargs)
+        # train once with base options
         else:
             self.train_pipeline(**kwargs)
 
     def train_pipeline(self, **kwargs):
+        # run train method
         built_in_train(self.config_path, self.work_dir, **kwargs)
 
         plot_logs.plot_all_logs_in_dir(self.work_dir)
 
-        model = init_detector(self.config_path,
-                              checkpoint="./work_dirs/main_config_clc_loss/latest.pth", device='cuda:0')
-        sanity_checks.test_json_anns(ann_path="../data/P-DESTRE/coco_format/merged/micro_train.json",
-                                     img_dir=CONVERTED_IMAGE_DIR, output_dir="../results/test_json_anns",
-                                     model=model)
+        # creates images with predictions from the model
+        # model = init_detector(self.config_path,
+        #                       checkpoint="./work_dirs/main_config_clc_loss/latest.pth", device='cuda:0')
+        # sanity_checks.test_json_anns(ann_path="../data/P-DESTRE/coco_format/merged/micro_train.json",
+        #                              img_dir=CONVERTED_IMAGE_DIR, output_dir="../results/test_json_anns",
+        #                              model=model)
 
     def create_lr_wd_combs(self):
-        learning_rates = generate_uniform_values(0.01, 0.001, 8)
-        weight_decays = generate_uniform_values(0.0001, 0, 2)
+        learning_rates = generate_uniform_values(0.01, 0.0005, 5)
+        weight_decays = generate_uniform_values(0.0001, 0.00001, 1)
         combs = list(product(learning_rates, weight_decays))
         for lr, wd in combs:
             self.options.append(dict(optimizer=dict(type='SGD', lr=lr, momentum=0.9, weight_decay=wd)))
@@ -58,11 +62,14 @@ def built_in_train(config_path, work_dir, **optional_args):
             additional_options.append(config_option_to_change)
         train_args += additional_options
 
+    # train if changed build-in method (can accept arguments when called).
     if mmdet_train.main.__code__.co_argcount > 0:
         mmdet_train.main(train_args)
     else:
+        # runs build-int train (tools/train.py) from console
         run_arg = f"python ../tools/train.py {' '.join(train_args)}"
         os.system(run_arg)
+
 
 def dict_generator(indict, previous=None):
     """Recursively generates listed data from the nested data structure."""
@@ -87,39 +94,6 @@ def generate_uniform_values(max_value, min_value, n) -> list:
         return [min_value]
     values = [random.uniform(min_value, max_value) for _ in range(n)]
     return values
-
-
-def user_defined_train(config_path, **kwargs):
-    cfg = Config.fromfile(config_path)
-    set_cfg_gpu(cfg)
-    # cfg.data.val.pipeline = cfg.train_pipeline  # https://github.com/open-mmlab/mmdetection/issues/1493
-
-    cfg.work_dir = "./work_dirs/main_config_test_new_method/"
-
-    datasets = [build_dataset(cfg.data.train), build_dataset(cfg.data.val)]
-
-    model = build_detector(cfg.model, train_cfg=cfg.get('train_cfg'), test_cfg=cfg.get('test_cfg'))
-    model.CLASSES = datasets[0].CLASSES
-
-    train_detector(
-        model,
-        datasets,
-        cfg,
-        distributed=False,
-        validate=True,
-        # timestamp=timestamp,
-        # meta=meta)
-        )
-    plot_logs.plot_all_logs_in_dir(cfg.work_dir)
-
-
-def set_cfg_gpu(cfg):
-    cfg.device = "cuda"
-    cfg.data.samples_per_gpu = 3
-    cfg.data.workers_per_gpu = 3
-    cfg.seed = 0
-    set_random_seed(0, deterministic=False)
-    cfg.gpu_ids = range(1)
 
 
 def old_train(create_params=False):
