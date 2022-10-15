@@ -36,11 +36,16 @@ class TrainManager:
         plot_logs.plot_all_logs_in_dir(self.work_dir)
 
         # creates images with predictions from the model
-        # model = init_detector(self.config_path,
-        #                       checkpoint="./work_dirs/main_config_clc_loss/latest.pth", device='cuda:0')
-        # sanity_checks.test_json_anns(ann_path="../data/P-DESTRE/coco_format/merged/micro_train.json",
-        #                              img_dir=CONVERTED_IMAGE_DIR, output_dir="../results/test_json_anns",
-        #                              model=model)
+        output_path = "../results/test_json_anns"
+        self.test_model_checkpoint_by_img_inference(output_dir=output_path)
+
+    def test_model_checkpoint_by_img_inference(self, output_dir):
+        checkpoint_latest = f"{self.work_dir}/latest.pth"
+        model = init_detector(self.config_path,
+                              checkpoint=checkpoint_latest, device='cuda:0')
+        sanity_checks.test_json_anns(ann_path=CONVERTED_ANNOTATIONS_DIR,
+                                     img_dir=CONVERTED_IMAGE_DIR, output_dir=output_dir,
+                                     model=model)
 
     def create_lr_wd_combs(self):
         learning_rates = generate_uniform_values(0.01, 0.0005, 5)
@@ -94,48 +99,3 @@ def generate_uniform_values(max_value, min_value, n) -> list:
         return [min_value]
     values = [random.uniform(min_value, max_value) for _ in range(n)]
     return values
-
-
-def old_train(create_params=False):
-    """
-    Retrains an pre-existed object detection model and outputs the checkpoints and logs into "train_exports" directory.
-    Builds a train dataset from cfg.data.train. Plots the train loss of train epochs and mAP of the validation epochs.
-
-    Args:
-        create_params (bool): Creates a combination of multiple params which are used to gradually
-                              multiple models.
-
-    Results are stored in train_exports directory.
-    """
-    from unused.org_config import cfg
-    import itertools
-
-    datasets = [build_dataset(cfg.data.train)]  # mmdet/datasets/ utils.py - change __check_head
-
-    learning_rates = [0.00016]
-    # weight_decays = [5.8e-3]
-    weight_decays = [0]
-    if create_params:
-        learning_rates = [random.uniform(0.0004, 0.00001) for _ in range(3)]
-        weight_decays = [random.uniform(0.01, 0.00001) for _ in range(6)]
-
-    train_combinations = list(itertools.product(learning_rates, weight_decays))
-
-    for i, (learning_rate, weight_decay) in enumerate(train_combinations):
-        print(f"Learning rate: {learning_rate}\nWeight decay: {weight_decay}")
-        # cfg.load_from = "../checkpoints/results/favorites/s32_e2_lr_1,3e4/latest.pth"
-        # cfg.optimizer = dict(type='SGD', lr=learning_rate, momentum=0.9, weight_decay=weight_decay)
-        # cfg.optimizer_config = dict(grad_clip=None)
-        # cfg.lr_config = dict(
-        #     policy='step',
-        #     warmup='linear',
-        #     warmup_iters=500,
-        #     warmup_ratio=0.001,
-        #     step=[7])
-        # cfg.work_dir_path = f"./train_exports/lr{learning_rate:.1e}_wd{weight_decay:.1e}"
-
-        model = build_detector(cfg.model, train_cfg=cfg.get('train_cfg'), test_cfg=cfg.get('test_cfg'))
-        model.CLASSES = ("person", )
-
-        train_detector(model, datasets, cfg, distributed=False, validate=True)
-        plot_logs.plot_all_logs_in_dir("../workdirs/train_exports", recursive=False)
