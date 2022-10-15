@@ -7,43 +7,39 @@ from settings import *
 from utils import files_in_folder, write_to_json
 
 
-class Vid2ImgConverter:
-    def __init__(self, coco_json, vidcap):
-        self.coco_json = coco_json
-        self.vidcap = vidcap
-        self.img_idx = 0
+def convert_pdestre_anns(new_annotations_dir, new_video_dir, convert_annotations_dir, convert_image_dir,
+                         frame_rate, override_checks=False):
+    """
+    Converts paired videos to jpg images and annotations to coco format json files.
 
-    def create_next_annotated_image(self, img_name, img_path, image_id, frame_idx):
-        # Checks if the image already exists
-        if not os.path.isfile(img_path):
-            # Create the current image
-            while self.img_idx < frame_idx:  # iterates util the current frame is found
-                success, image = self.vidcap.read()
-                if not success:
-                    print(f"vidcap.read() not successful!\n Filename: {img_path}")
-                    raise IOError(f"vidcap.read() not successful!\n Filename: {img_path}")
-                self.img_idx += 1
-                if self.img_idx == frame_idx:
-                    cv2.imwrite(img_path, image)  # save frame as JPEG file
+    Args:
+        new_annotations_dir (str): A path to the folder with annotations.
+        new_video_dir (str): A path to folder with videos.
+        convert_annotations_dir (str): A path to the folder for formatted annotations.
+        convert_image_dir (str): A path to the folder for images got from the video.
+        frame_rate (int): Determines which frames should be converted (each 10th for instance).
+        override_checks (bool): Overrides checks if annotations are already present.
 
-        # store the image info
-        image = mmcv.imread(img_path)
-        width, height = image.shape[:2]
-        image_info = dict(file_name=img_name, width=width, height=height, id=image_id)
-        self.coco_json["images"].append(image_info)
+    """
 
+    names_paired = check_pairs_in_dataset(new_annotations_dir, new_video_dir)
 
-def load_anns_vidcap(ann_path, video_path):
-    # load video
-    print(f"Converting video from: {video_path}")
-    vidcap = cv2.VideoCapture(video_path)
+    # take each paired name, convert video to jpgs, create new COCO-style annotation
+    for i, name in enumerate(names_paired):
+        video_path = f"{new_video_dir}/{name}.{NEW_VIDEO_TYPE}"
+        ann_path = f"{new_annotations_dir}/{name}.{NEW_ANNOTATION_TYPE}"
 
-    # load annotations as list
-    print(f"Converting annotations from: {ann_path}")
-    with open(ann_path, "r") as reader:
-        ann_list = reader.readlines()
+        # test if already converted
+        likely_ann_path = f"{convert_annotations_dir}/{name}.json"
 
-    return ann_list, vidcap
+        # Checks if the annotation file already exists. If so, skips the conversion.
+        if os.path.isfile(likely_ann_path) and not override_checks:
+            print(f"{likely_ann_path} already exists.")
+            continue
+
+        # Converts an annotation file with corresponding video.
+        pdestre_anns_to_coco(ann_path, video_path, name, convert_annotations_dir, convert_image_dir,
+                             frame_rate=frame_rate)
 
 
 def pdestre_anns_to_coco(ann_path, video_path, file_name, output_folder, image_folder, frame_rate=10):
@@ -126,10 +122,31 @@ def pdestre_anns_to_coco(ann_path, video_path, file_name, output_folder, image_f
 
     write_to_json(coco_json, output_path=output_folder + "/" + file_name + ".json")
 
-    # json_output = json.dumps(coco_json)
-    # with open(output_path, "w") as outfile:
-    #     print(f"Storing annotations to json at: {output_path}")
-    #     outfile.write(json_output)
+
+class Vid2ImgConverter:
+    def __init__(self, coco_json, vidcap):
+        self.coco_json = coco_json
+        self.vidcap = vidcap
+        self.img_idx = 0
+
+    def create_next_annotated_image(self, img_name, img_path, image_id, frame_idx):
+        # Checks if the image already exists
+        if not os.path.isfile(img_path):
+            # Create the current image
+            while self.img_idx < frame_idx:  # iterates util the current frame is found
+                success, image = self.vidcap.read()
+                if not success:
+                    print(f"vidcap.read() not successful!\n Filename: {img_path}")
+                    raise IOError(f"vidcap.read() not successful!\n Filename: {img_path}")
+                self.img_idx += 1
+                if self.img_idx == frame_idx:
+                    cv2.imwrite(img_path, image)  # save frame as JPEG file
+
+        # store the image info
+        image = mmcv.imread(img_path)
+        width, height = image.shape[:2]
+        image_info = dict(file_name=img_name, width=width, height=height, id=image_id)
+        self.coco_json["images"].append(image_info)
 
 
 def check_pairs_in_dataset(new_annotations_dir, new_video_dir):
@@ -166,36 +183,15 @@ def check_pairs_in_dataset(new_annotations_dir, new_video_dir):
     return names_paired
 
 
-def convert_pdestre_anns(new_annotations_dir, new_video_dir, convert_annotations_dir, convert_image_dir,
-                         frame_rate, override_checks=False):
-    """
-    Converts paired videos to jpg images and annotations to coco format json files.
+def load_anns_vidcap(ann_path, video_path):
+    # load video
+    print(f"Converting video from: {video_path}")
+    vidcap = cv2.VideoCapture(video_path)
 
-    Args:
-        new_annotations_dir (str): A path to the folder with annotations.
-        new_video_dir (str): A path to folder with videos.
-        convert_annotations_dir (str): A path to the folder for formatted annotations.
-        convert_image_dir (str): A path to the folder for images got from the video.
-        frame_rate (int): Determines which frames should be converted (each 10th for instance).
-        override_checks (bool): Overrides checks if annotations are already present.
+    # load annotations as list
+    print(f"Converting annotations from: {ann_path}")
+    with open(ann_path, "r") as reader:
+        ann_list = reader.readlines()
 
-    """
+    return ann_list, vidcap
 
-    names_paired = check_pairs_in_dataset(new_annotations_dir, new_video_dir)
-
-    # take each paired name, convert video to jpgs, create new COCO-style annotation
-    for i, name in enumerate(names_paired):
-        video_path = f"{new_video_dir}/{name}.{NEW_VIDEO_TYPE}"
-        ann_path = f"{new_annotations_dir}/{name}.{NEW_ANNOTATION_TYPE}"
-
-        # test if already converted
-        likely_ann_path = f"{convert_annotations_dir}/{name}.json"
-
-        # Checks if the annotation file already exists. If so, skips the conversion.
-        if os.path.isfile(likely_ann_path) and not override_checks:
-            print(f"{likely_ann_path} already exists.")
-            continue
-
-        # Converts an annotation file with corresponding video.
-        pdestre_anns_to_coco(ann_path, video_path, name, convert_annotations_dir, convert_image_dir,
-                             frame_rate=frame_rate)

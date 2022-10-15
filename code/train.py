@@ -41,11 +41,11 @@ class TrainManager:
 
     def test_model_checkpoint_by_img_inference(self, output_dir):
         checkpoint_latest = f"{self.work_dir}/latest.pth"
-        model = init_detector(self.config_path,
-                              checkpoint=checkpoint_latest, device='cuda:0')
-        sanity_checks.test_json_anns(ann_path=CONVERTED_ANNOTATIONS_DIR,
-                                     img_dir=CONVERTED_IMAGE_DIR, output_dir=output_dir,
-                                     model=model)
+        # model = init_detector(self.config_path,
+        #                       checkpoint=checkpoint_latest, device='cuda:0')
+        # sanity_checks.test_json_anns(ann_path=f"CONVERTED_ANNOTATIONS_DIR",
+        #                              img_dir=CONVERTED_IMAGE_DIR, output_dir=output_dir,
+        #                              model=model)
 
     def create_lr_wd_combs(self):
         learning_rates = generate_uniform_values(0.01, 0.0005, 5)

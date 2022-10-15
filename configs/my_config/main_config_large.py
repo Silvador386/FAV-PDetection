@@ -2,8 +2,8 @@ _base_ = "../faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py"
 
 
 # # 1. dataset settings
-_ann_file_train = "c:/Programming/Python Projects/FAV_PD/data/P-DESTRE/coco_format/merged/micro_train.json"
-_ann_file_test = "c:/Programming/Python Projects/FAV_PD/data/P-DESTRE/coco_format/merged/micro_train.json"
+_ann_file_train = "c:/Programming/Python Projects/FAV_PD/data/P-DESTRE/coco_format/merged/large_train.json"
+_ann_file_test = "c:/Programming/Python Projects/FAV_PD/data/P-DESTRE/coco_format/merged/large_test.json"
 _img_prefix = "c:/Programming/Python Projects/FAV_PD/data/P-DESTRE/coco_format/videos/"
 _dataset_type = 'CocoDataset'
 _classes = ("person",)
@@ -15,7 +15,7 @@ train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True, with_mask=True),
     dict(type='Resize', img_scale=(1333, 800), keep_ratio=True),
-    # dict(type='RandomFlip', flip_ratio=0),
+    dict(type='RandomFlip', flip_ratio=0),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='Pad', size_divisor=32),
     dict(type='DefaultFormatBundle'),
@@ -29,7 +29,7 @@ test_pipeline = [
         flip=False,
         transforms=[
             dict(type='Resize', keep_ratio=True),
-            # dict(type='RandomFlip', flip_ratio=0),
+            dict(type='RandomFlip', flip_ratio=0),
             dict(type='Normalize', **img_norm_cfg),
             dict(type='Pad', size_divisor=32),
             dict(type='ImageToTensor', keys=['img']),
@@ -74,7 +74,7 @@ model = dict(
             target_means=[.0, .0, .0, .0],
             target_stds=[1.0, 1.0, 1.0, 1.0]),
         loss_cls=dict(
-            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0),
+            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1),
         loss_bbox=dict(type='L1Loss', loss_weight=1.0)),
     roi_head=dict(
         bbox_head=dict(
@@ -89,55 +89,41 @@ model = dict(
                 target_stds=[0.1, 0.1, 0.2, 0.2]),
             reg_class_agnostic=False,
             loss_cls=dict(
-                type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
+                type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1),
             loss_bbox=dict(type='L1Loss', loss_weight=1.0))))
-
 
 evaluation = dict(metric="bbox", save_best="auto")
 
-optimizer = dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0)
-
-# optimizer = dict(_delete_=True, type='Adam', lr=0.001)
+optimizer = dict(type='SGD', lr=0.001494, momentum=0.9, weight_decay=7.374327414330123e-05)
 optimizer_config = dict(grad_clip=None)
 # learning policy
 lr_config = dict(
     policy='step',
     warmup='linear',
-    warmup_iters=1,
+    warmup_iters=100,
     warmup_ratio=0.01,
+    # step=[20, 30]
     )
 
-# lr_config = dict(
-#     _delete_=True,
-#     policy='cyclic',
-#     warmup='linear',
-#     warmup_iters=5,
-#     warmup_ratio=0.01,
-#     target_ratio=(10, 1e-4),
-#     cyclic_times=1,
-#     step_ratio_up=0.4,
-# )
+runner = dict(type='EpochBasedRunner', max_epochs=2)
 
-runner = dict(type='EpochBasedRunner', max_epochs=5)
-
-checkpoint_config = dict(interval=50)
+checkpoint_config = dict(interval=1)
 log_config = dict(
-    interval=1,
+    interval=50,
     hooks=[
         dict(type='TextLoggerHook'),
         dict(type='MMDetWandbHook',
              init_kwargs={'project': 'FAV_PD'},
-             interval=10,
-             # log_checkpoint=True,
-             # log_checkpoint_metadata=True,
-             # num_eval_images=100,
-             # bbox_score_thr=0.3
+             interval=50,
+             log_checkpoint=False,
+             log_checkpoint_metadata=True,
+             num_eval_images=0,
+             bbox_score_thr=0.3
              )
-         ]
+    ]
 )
 
+workflow = [("train", 1), ("val", 1)]
 
-workflow = [("train", 1)]
-
-# load_from = "C:\Programming\Python Projects\FAV_PD\code\work_dirs\main_config_clc_loss\\latest.pth"
+# load_from = "c:/Programming/Python Projects/FAV_PD/code/work_dirs/main_config/latest.pth"
 load_from = "c:/Programming/Python Projects/FAV_PD/checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth"
