@@ -36,16 +36,15 @@ class TrainManager:
         plot_logs.plot_all_logs_in_dir(self.work_dir)
 
         # creates images with predictions from the model
-        output_path = "../results/test_json_anns"
-        self.test_model_checkpoint_by_img_inference(output_dir=output_path)
+        # output_path = "../results/test_json_anns/large"
+        # self.test_model_checkpoint_by_img_inference(output_dir=output_path)
 
     def test_model_checkpoint_by_img_inference(self, output_dir):
         checkpoint_latest = f"{self.work_dir}/latest.pth"
-        # model = init_detector(self.config_path,
-        #                       checkpoint=checkpoint_latest, device='cuda:0')
-        # sanity_checks.test_json_anns(ann_path=f"CONVERTED_ANNOTATIONS_DIR",
-        #                              img_dir=CONVERTED_IMAGE_DIR, output_dir=output_dir,
-        #                              model=model)
+        model = init_detector(self.config_path,
+                              checkpoint=checkpoint_latest, device='cuda:0')
+        sanity_checks.test_json_anns(config_path=self.config_path, output_dir=output_dir,
+                                     model=model, max_num=5)
 
     def create_lr_wd_combs(self):
         learning_rates = generate_uniform_values(0.01, 0.0005, 5)

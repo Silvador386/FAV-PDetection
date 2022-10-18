@@ -32,6 +32,7 @@ def create_mini_dataset(ann_path, output_path, file_name, num_images):
 def test_rect_anns(ann_path, img_dir, output_dir, max_num=-1, resize=False):
 
     images, annotations, _ = load_ann_data(ann_path)
+    random.shuffle(images)
 
     for i, image in enumerate(images):
         img_name = image["file_name"]
@@ -82,6 +83,7 @@ def test_image_inference(ann_path, img_folder_path, model, output_dir, max_num=-
         model = init_detector(DEFAULT_CONFIG, DEFAULT_CHECKPOINT_LATEST, device='cuda:0')
 
     images, annotations, categories = load_ann_data(ann_path)
+    random.shuffle(images)
 
     for i, image in enumerate(images):
         img_name = image["file_name"]
@@ -100,6 +102,11 @@ def test_image_inference(ann_path, img_folder_path, model, output_dir, max_num=-
             break
 
 
-def test_json_anns(ann_path, img_dir, output_dir=None, model=None, max_num=-1):
+def test_json_anns(config_path, output_dir=None, model=None, max_num=-1):
+    from mmcv import Config
+    config = Config().fromfile(config_path)
+    ann_path = config._ann_file_test
+    img_dir = config._img_prefix
+
     test_rect_anns(ann_path, img_dir, output_dir, max_num)
     test_image_inference(ann_path, img_dir, model, output_dir, max_num)

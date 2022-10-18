@@ -1,4 +1,4 @@
-_base_ = "../faster_rcnn/faster_rcnn_r50_fpn_1x_coco.py"
+_base_ = "../faster_rcnn/faster_rcnn_r50_fpn_2x_coco.py"
 
 
 # # 1. dataset settings
@@ -74,7 +74,7 @@ model = dict(
             target_means=[.0, .0, .0, .0],
             target_stds=[1.0, 1.0, 1.0, 1.0]),
         loss_cls=dict(
-            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1),
+            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0),
         loss_bbox=dict(type='L1Loss', loss_weight=1.0)),
     roi_head=dict(
         bbox_head=dict(
@@ -89,23 +89,23 @@ model = dict(
                 target_stds=[0.1, 0.1, 0.2, 0.2]),
             reg_class_agnostic=False,
             loss_cls=dict(
-                type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1),
+                type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
             loss_bbox=dict(type='L1Loss', loss_weight=1.0))))
 
 evaluation = dict(metric="bbox", save_best="auto")
 
-optimizer = dict(type='SGD', lr=0.001494, momentum=0.9, weight_decay=7.374327414330123e-05)
+optimizer = dict(type='SGD', lr=0.005, momentum=0.9, weight_decay=1e-04)
 optimizer_config = dict(grad_clip=None)
 # learning policy
 lr_config = dict(
     policy='step',
     warmup='linear',
-    warmup_iters=100,
+    warmup_iters=200,
     warmup_ratio=0.01,
     # step=[20, 30]
     )
 
-runner = dict(type='EpochBasedRunner', max_epochs=2)
+runner = dict(type='EpochBasedRunner', max_epochs=3)
 
 checkpoint_config = dict(interval=1)
 log_config = dict(
