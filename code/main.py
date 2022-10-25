@@ -39,9 +39,9 @@ def main():
 
     """ Current pipeline """
     config_path = "../configs/my_config/main_config_large.py"
-    work_dir = "./work_dirs/main_config_large"
+    work_dir = "../work_dirs/"
     trainer = TrainManager(config_path, work_dir)
-    # trainer.train(create_opts=False)
+    trainer.train(create_opts=False)
 
 
     test()

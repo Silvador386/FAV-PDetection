@@ -33,7 +33,7 @@ class TrainManager:
         # run train method
         built_in_train(self.config_path, self.work_dir, **kwargs)
 
-        plot_logs.plot_all_logs_in_dir(self.work_dir)
+        # plot_logs.plot_all_logs_in_dir(self.work_dir)
 
         # creates images with predictions from the model
         # output_path = "../results/test_json_anns/large"

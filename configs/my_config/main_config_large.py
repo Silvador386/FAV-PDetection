@@ -2,9 +2,9 @@ _base_ = "../faster_rcnn/faster_rcnn_r50_fpn_2x_coco.py"
 
 
 # # 1. dataset settings
-_ann_file_train = "c:/Programming/Python Projects/FAV_PD/data/P-DESTRE/coco_format/merged/large_train.json"
-_ann_file_test = "c:/Programming/Python Projects/FAV_PD/data/P-DESTRE/coco_format/merged/large_test.json"
-_img_prefix = "c:/Programming/Python Projects/FAV_PD/data/P-DESTRE/coco_format/videos/"
+_ann_file_train = "../data/P-DESTRE/coco_format/merged/large_train.json"
+_ann_file_test = "../data/P-DESTRE/coco_format/merged/large_test.json"
+_img_prefix = "../data/P-DESTRE/coco_format/videos/"
 _dataset_type = 'CocoDataset'
 _classes = ("person",)
 _num_classes = len(_classes)
@@ -126,4 +126,4 @@ log_config = dict(
 workflow = [("train", 1), ("val", 1)]
 
 # load_from = "c:/Programming/Python Projects/FAV_PD/code/work_dirs/main_config/latest.pth"
-load_from = "c:/Programming/Python Projects/FAV_PD/checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth"
+load_from = "../checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth"
