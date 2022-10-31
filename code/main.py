@@ -44,7 +44,7 @@ def main():
     trainer.train(create_opts=False)
 
 
-    test()
+    # test()
     # os.system("python ../tools/test.py ../configs/my_config/original_model.py "
     #           "../checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth "
     #           "--eval bbox "
