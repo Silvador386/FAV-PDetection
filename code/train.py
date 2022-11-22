@@ -2,14 +2,12 @@ import random
 import os
 from itertools import product
 
-from mmdet.datasets import build_dataset
-from mmdet.models import build_detector
-from mmdet.apis import init_detector, train_detector, inference_detector, show_result_pyplot, set_random_seed
+
+from mmdet.apis import init_detector
 from tools import train as mmdet_train
 
-import plot_logs
+
 import sanity_checks
-from settings import *
 
 
 class TrainManager:

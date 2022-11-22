@@ -1,18 +1,18 @@
 #!/bin/bash
 #PBS -q iti
-#PBS -l walltime=1:00:00
+#PBS -l walltime=6:00:00
 #PBS -l select=1:ncpus=1:ngpus=1:mem=16gb:scratch_ssd=75gb:gpu_cap=cuda75
 #PBS -j oe
 #PBS -o /storage/plzen1/home/silvador386/
 #PBS -m ae
 
 
-sing_image=mmdetect_img.sif
-wandb_key=3ec9e4ce5426e9fa2a7e3c8c7a8f61e944deed48
+sing_image=mmdet.sif
+wandb_key=914e9d22162e0de6b449556aee8c920c4d0d28c5
 
 
 # -- tested by:
-##$ qsub -I -l select=1:ncpus=1:ngpus=1:mem=16gb:scratch_ssd=75gb:gpu_cap=cuda75 -l walltime=2:00:00 -q gpu
+##$ qsub -I -l select=1:ncpus=1:ngpus=1:mem=16gb:scratch_ssd=75gb:gpu_cap=cuda75 -l walltime=2:30:00 -q gpu
 
 cp -r /storage/plzen1/home/silvador386/FAV-PDetection/ "$SCRATCHDIR" || exit $LINENO
 
@@ -33,5 +33,5 @@ singularity exec --nv -B "$SCRATCHDIR"  ../"$sing_image" \
 
 mkdir /storage/plzen1/home/silvador386/FAV-PDetection_Output/"$today"
 cp -r "$OUTPUT_PATH" /storage/plzen1/home/silvador386/FAV-PDetection_Output/"$today"
-cp ../"$WORK_PATH"/sing_FAV_PD.sh /storage/plzen1/home/silvador386/FAV-PDetection_Output/"$today"
+cp ../sing_FAV_PD.sh /storage/plzen1/home/silvador386/FAV-PDetection_Output/"$today"
 

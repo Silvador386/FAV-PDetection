@@ -94,18 +94,18 @@ model = dict(
 
 evaluation = dict(metric="bbox", save_best="auto")
 
-optimizer = dict(type='SGD', lr=0.005, momentum=0.9, weight_decay=1e-04)
+optimizer = dict(type='SGD', lr=0.002, momentum=0.9, weight_decay=1e-04)
 optimizer_config = dict(grad_clip=None)
 # learning policy
 lr_config = dict(
     policy='step',
     warmup='linear',
-    warmup_iters=200,
+    warmup_iters=500,
     warmup_ratio=0.01,
     # step=[20, 30]
     )
 
-runner = dict(type='EpochBasedRunner', max_epochs=3)
+runner = dict(type='EpochBasedRunner', max_epochs=8)
 
 checkpoint_config = dict(interval=1)
 log_config = dict(
