@@ -19,7 +19,7 @@ mmdet==2.25.1
 model-index==0.1.11
 numpy==1.23.1
 opencv-python==4.6.0.66
-openmim==0.2.0
+openmim==0.3.3
 ordered-set==4.1.0
 packaging==21.3
 pandas==1.4.3

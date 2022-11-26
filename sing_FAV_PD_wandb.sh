@@ -1,14 +1,14 @@
 #!/bin/bash
-#PBS -q iti
-#PBS -l walltime=6:00:00
-#PBS -l select=1:ncpus=1:ngpus=1:mem=16gb:scratch_ssd=75gb:gpu_cap=cuda75
+#PBS -q gpu@meta-pbs.metacentrum.cz
+#PBS -l walltime=6:30:00
+#PBS -l select=1:ncpus=1:ngpus=1:mem=16gb:scratch_local=75gb:gpu_cap=cuda75
 #PBS -j oe
 #PBS -o /storage/plzen1/home/silvador386/
 #PBS -m ae
 
 
 sing_image=mmdet.sif
-wandb_key=914e9d22162e0de6b449556aee8c920c4d0d28c5
+wandb_key= "fill in"
 
 
 # -- tested by:
@@ -34,4 +34,5 @@ singularity exec --nv -B "$SCRATCHDIR"  ../"$sing_image" \
 mkdir /storage/plzen1/home/silvador386/FAV-PDetection_Output/"$today"
 cp -r "$OUTPUT_PATH" /storage/plzen1/home/silvador386/FAV-PDetection_Output/"$today"
 cp ../sing_FAV_PD.sh /storage/plzen1/home/silvador386/FAV-PDetection_Output/"$today"
+
 
