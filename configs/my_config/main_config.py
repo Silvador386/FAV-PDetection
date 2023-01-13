@@ -2,8 +2,8 @@ _base_ = "../faster_rcnn/faster_rcnn_r50_fpn_2x_coco.py"
 
 
 # # 1. dataset settings
-_ann_file_train = "c:/Programming/Python Projects/FAV_PD/data/P-DESTRE/coco_format/merged/micro_train.json"
-_ann_file_test = "c:/Programming/Python Projects/FAV_PD/data/P-DESTRE/coco_format/merged/micro_train.json"
+_ann_file_train = "c:/Programming/Python Projects/FAV_PD/data/P-DESTRE/coco_format/merged/micro.json"
+_ann_file_test = "c:/Programming/Python Projects/FAV_PD/data/P-DESTRE/coco_format/merged/micro.json"
 _img_prefix = "c:/Programming/Python Projects/FAV_PD/data/P-DESTRE/coco_format/videos/"
 _dataset_type = 'CocoDataset'
 _classes = ("person",)
@@ -95,7 +95,7 @@ model = dict(
 
 evaluation = dict(metric="bbox", save_best="auto")
 
-optimizer = dict(type='SGD', lr=0.01, momentum=0.9, weight_decay=0)
+optimizer = dict(type='SGD', lr=0.02, momentum=0.9, weight_decay=0.0001)
 
 # optimizer = dict(_delete_=True, type='Adam', lr=0.001)
 optimizer_config = dict(grad_clip=None)
@@ -118,22 +118,22 @@ lr_config = dict(
 #     step_ratio_up=0.4,
 # )
 
-runner = dict(type='EpochBasedRunner', max_epochs=5)
+runner = dict(type='EpochBasedRunner', max_epochs=30)
 
 checkpoint_config = dict(interval=50)
 log_config = dict(
     interval=1,
-    hooks=[
-        dict(type='TextLoggerHook'),
-        dict(type='MMDetWandbHook',
-             init_kwargs={'project': 'FAV_PD'},
-             interval=10,
-             # log_checkpoint=True,
-             # log_checkpoint_metadata=True,
-             # num_eval_images=100,
-             # bbox_score_thr=0.3
-             )
-         ]
+    # hooks=[
+    #     dict(type='TextLoggerHook'),
+    #     dict(type='MMDetWandbHook',
+    #          init_kwargs={'project': 'FAV_PD'},
+    #          interval=10,
+    #          # log_checkpoint=True,
+    #          # log_checkpoint_metadata=True,
+    #          # num_eval_images=100,
+    #          # bbox_score_thr=0.3
+    #          )
+    #      ]
 )
 
 

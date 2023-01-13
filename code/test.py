@@ -5,7 +5,8 @@ from pdestre_conversion import *
 from settings import *
 
 
-def test():
+def test(config_file="../configs/my_config/main_config_large.py",
+         checkpoint_file="./work_dirs/main_config_clc_loss/latest.pth"):
     """
     Tests current model on the station_control data and some imgs from PDestre dataset.
     The interference is stored in the "out_prefix" folder.
@@ -18,16 +19,15 @@ def test():
     # out_prefix = "../results/station_BasicFasterRCNN"
 
     # Test current model
-    config_file = "../configs/my_config/main_config_large.py"
     # checkpoint_file = "../checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth"
-    checkpoint_file = "./work_dirs/main_config_clc_loss/latest.pth"
+
 
     output_prefix = "../results/station_pdestre"
 
     model = init_detector(config_file, checkpoint_file, device='cuda:0')
 
     test_on_city_data(model, output_prefix)
-    test_model_on_pdestre_imgs(model)
+    # test_model_on_pdestre_imgs(model)
 
 
 def test_on_city_data(model, output_prefix ):

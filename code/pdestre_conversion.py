@@ -144,7 +144,7 @@ class Vid2ImgConverter:
 
         # store the image info
         image = mmcv.imread(img_path)
-        width, height = image.shape[:2]
+        height, width = image.shape[:2]
         image_info = dict(file_name=img_name, width=width, height=height, id=image_id)
         self.coco_json["images"].append(image_info)
 

@@ -45,8 +45,8 @@ class TrainManager:
                                      model=model, max_num=5)
 
     def create_lr_wd_combs(self):
-        learning_rates = generate_uniform_values(0.01, 0.0005, 5)
-        weight_decays = generate_uniform_values(0.0001, 0.00001, 1)
+        learning_rates = generate_uniform_values(0.005, 0.00005, 3)
+        weight_decays = generate_uniform_values(0.0001, 0.000001, 2)
         combs = list(product(learning_rates, weight_decays))
         for lr, wd in combs:
             self.options.append(dict(optimizer=dict(type='SGD', lr=lr, momentum=0.9, weight_decay=wd)))

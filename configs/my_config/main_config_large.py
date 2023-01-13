@@ -38,8 +38,8 @@ test_pipeline = [
 ]
 
 data = dict(
-    samples_per_gpu=3,
-    workers_per_gpu=3,
+    samples_per_gpu=8,
+    workers_per_gpu=8,
     train=dict(
         type=_dataset_type,
         # explicitly add your class names to the field `classes`
@@ -105,7 +105,7 @@ lr_config = dict(
     # step=[20, 30]
     )
 
-runner = dict(type='EpochBasedRunner', max_epochs=10)
+runner = dict(type='EpochBasedRunner', max_epochs=8)
 
 checkpoint_config = dict(interval=2)
 log_config = dict(
