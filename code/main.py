@@ -1,11 +1,8 @@
-import os
-
 from merge_pdestre2json import select_jsons_to_merge, merge_json_files
 from pdestre_conversion import *
 from settings import *
 from train import TrainManager
 from test import test
-import wandb
 
 
 def convert_and_merge_PDdata():
@@ -35,10 +32,6 @@ def convert_and_merge_PDdata():
 
 
 def main():
-    """ Testing sanity-checks, """
-    # sanity_checks.create_mini_dataset("../data/P-DESTRE/coco_format/merged/large_train.json",
-    #                                   "../data/P-DESTRE/coco_format/merged", "debug_trial", 2)
-
     """ Current pipeline """
     config_path = "../configs/my_config/main_config.py"
     work_dir = "../work_dirs/"
@@ -55,11 +48,5 @@ def main():
 
 
 if __name__ == "__main__":
-
-    # convert_and_merge_PDdata()
     main()
-    # from tools.misc import browse_dataset
-    # kwargs = ["../configs/my_config/main_config.py", "--output-dir", "../results/browse_dataset", "--not-show"]
-    # browse_dataset.main(kwargs)
-    # # os.system("python ./tools/misc/browse_dataset.py"
-    #           " ./configs/my_config/main_config.py --output-dir ./results/browse_dataset --not-show --show-interval 8")
+

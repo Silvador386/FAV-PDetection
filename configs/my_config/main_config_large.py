@@ -11,6 +11,7 @@ _num_classes = len(_classes)
 
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
+
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True, with_mask=True),
@@ -21,6 +22,7 @@ train_pipeline = [
     dict(type='DefaultFormatBundle'),
     dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels', 'gt_masks']),
 ]
+
 test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
@@ -94,7 +96,7 @@ model = dict(
 
 evaluation = dict(metric="bbox", save_best="auto")
 
-optimizer = dict(type='SGD', lr=0.002, momentum=0.9, weight_decay=1e-04)
+optimizer = dict(type='SGD', lr=0.0007, momentum=0.9, weight_decay=0.00005)
 optimizer_config = dict(grad_clip=None)
 # learning policy
 lr_config = dict(
@@ -102,10 +104,10 @@ lr_config = dict(
     warmup='linear',
     warmup_iters=500,
     warmup_ratio=0.01,
-    # step=[20, 30]
+    step=[15, 30]
     )
 
-runner = dict(type='EpochBasedRunner', max_epochs=8)
+runner = dict(type='EpochBasedRunner', max_epochs=20)
 
 checkpoint_config = dict(interval=2)
 log_config = dict(
