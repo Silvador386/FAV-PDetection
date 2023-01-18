@@ -7,30 +7,30 @@ from settings import *
 from utils import files_in_folder, write_to_json
 
 
-def convert_pdestre_anns(new_annotations_dir, new_video_dir, convert_annotations_dir, convert_image_dir,
+def convert_pdestre_anns(ann_dir, video_dir, converted_ann_dir, converted_img_dir,
                          frame_rate, override_checks=False):
     """
     Converts paired videos to jpg images and annotations to coco format json files.
 
     Args:
-        new_annotations_dir (str): A path to the folder with annotations.
-        new_video_dir (str): A path to folder with videos.
-        convert_annotations_dir (str): A path to the folder for formatted annotations.
-        convert_image_dir (str): A path to the folder for images got from the video.
+        ann_dir (str): A path to the folder with annotations.
+        video_dir (str): A path to folder with videos.
+        converted_ann_dir (str): A path to the folder for formatted annotations.
+        converted_img_dir (str): A path to the folder for images got from the video.
         frame_rate (int): Determines which frames should be converted (each 10th for instance).
         override_checks (bool): Overrides checks if annotations are already present.
 
     """
 
-    names_paired = check_pairs_in_dataset(new_annotations_dir, new_video_dir)
+    names_paired = check_pairs_in_dataset(ann_dir, video_dir)
 
     # take each paired name, convert video to jpgs, create new COCO-style annotation
     for i, name in enumerate(names_paired):
-        video_path = f"{new_video_dir}/{name}.{NEW_VIDEO_TYPE}"
-        ann_path = f"{new_annotations_dir}/{name}.{NEW_ANNOTATION_TYPE}"
+        video_path = f"{video_dir}/{name}.{NEW_VIDEO_TYPE}"
+        ann_path = f"{ann_dir}/{name}.{NEW_ANNOTATION_TYPE}"
 
         # test if already converted
-        likely_ann_path = f"{convert_annotations_dir}/{name}.json"
+        likely_ann_path = f"{converted_ann_dir}/{name}.json"
 
         # Checks if the annotation file already exists. If so, skips the conversion.
         if os.path.isfile(likely_ann_path) and not override_checks:
@@ -38,7 +38,7 @@ def convert_pdestre_anns(new_annotations_dir, new_video_dir, convert_annotations
             continue
 
         # Converts an annotation file with corresponding video.
-        pdestre_anns_to_coco(ann_path, video_path, name, convert_annotations_dir, convert_image_dir,
+        pdestre_anns_to_coco(ann_path, video_path, name, converted_ann_dir, converted_img_dir,
                              frame_rate=frame_rate)
 
 
@@ -89,30 +89,6 @@ def pdestre_anns_to_coco(ann_path, video_path, file_name, output_folder, image_f
 
                 previous_frame_idx = frame_idx
 
-                # # Checks if the image already exists
-                # if not os.path.isfile(img_file_name):
-                #     # Convert the image
-                #     skip = False  # skips the annotation line if the read was unsuccessful
-                #     while img_idx < frame_idx:  # iterates util the current frame is found
-                #         success, image = vidcap.read()
-                #         if not success:
-                #             print(f"vidcap.read() not successful!\n Filename: {img_name}")
-                #             skip = True
-                #             break
-                #         img_idx += 1
-                #         if img_idx == frame_idx:
-                #             cv2.imwrite(img_file_name, image)  # save frame as JPEG file
-                #     if skip:
-                #         continue
-                #
-                #
-                # # store the image info
-                # image = mmcv.imread(img_file_name)
-                # width, height = image.shape[:2]
-                # image_info = dict(file_name=img_name, width=width, height=height, id=image_id)
-                # coco_json["images"].append(image_info)
-
-
             # Store annotation
             bbox = [float(val) for val in ann_line_values[2:6]]
             area = bbox[2] * bbox[3]
@@ -149,20 +125,20 @@ class Vid2ImgConverter:
         self.coco_json["images"].append(image_info)
 
 
-def check_pairs_in_dataset(new_annotations_dir, new_video_dir):
+def check_pairs_in_dataset(ann_dir, video_dir):
     """
     Checks for paired annotation and video names.
 
     Args:
-        new_annotations_dir (str): A path to the folder with annotations.
-        new_video_dir (str): A path to folder with videos.
+        ann_dir (str): A path to the folder with annotations.
+        video_dir (str): A path to folder with videos.
 
     Returns:
          names_paired: A list of strings (names of files that are paired).
     """
 
-    annotation_names = files_in_folder(new_annotations_dir)
-    video_names = files_in_folder(new_video_dir)
+    annotation_names = files_in_folder(ann_dir)
+    video_names = files_in_folder(video_dir)
 
     # remove .type suffix
     annotation_type = f".{NEW_ANNOTATION_TYPE}"

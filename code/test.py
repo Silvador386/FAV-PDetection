@@ -51,12 +51,12 @@ def test_on_city_data(model, output_prefix ):
 
 def test_model_on_pdestre_imgs(model):
     # Randomly picked images to be shown on.
-    pdestre_examples = [CONVERTED_IMAGE_DIR + "/12-11-2019-2-1_f00160.jpg",
-                        CONVERTED_IMAGE_DIR + "/13-11-2019-1-2_f01560.jpg",
-                        CONVERTED_IMAGE_DIR + "/10-07-2019-1-1_f00670.jpg",
-                        CONVERTED_IMAGE_DIR + "/18-07-2019-1-2_f00280.jpg",
-                        CONVERTED_IMAGE_DIR + "/08-11-2019-2-1_f00360.jpg",
-                        CONVERTED_IMAGE_DIR + "/08-11-2019-1-2_f01090.jpg"
+    pdestre_examples = [converted_img_dir + "/12-11-2019-2-1_f00160.jpg",
+                        converted_img_dir + "/13-11-2019-1-2_f01560.jpg",
+                        converted_img_dir + "/10-07-2019-1-1_f00670.jpg",
+                        converted_img_dir + "/18-07-2019-1-2_f00280.jpg",
+                        converted_img_dir + "/08-11-2019-2-1_f00360.jpg",
+                        converted_img_dir + "/08-11-2019-1-2_f01090.jpg"
                         ]
 
     for e in pdestre_examples:
