@@ -44,7 +44,8 @@ def basic_train(learning_rate, weight_decay, optimizer=None):
         cfg.optimizer.weight_decay = weight_decay
     if optimizer:
         cfg.optimizer.type = optimizer
-
+        if optimizer == "Adam":
+            cfg.optimizer.pop("momentum")
     # create work_dir_path
     mmcv.mkdir_or_exist(osp.abspath(cfg.work_dir))
     timestamp = time.strftime('%Y%m%d_%H%M%S', time.localtime())
