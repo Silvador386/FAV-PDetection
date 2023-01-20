@@ -1,0 +1,15 @@
+program: train_pd.py
+method: random
+metric:
+  goal: maximize
+  name: val_acc
+parameters:
+  epochs:
+    values: 5
+  learning_rate:
+    max = 0.005
+    min = 0.00001
+  weight_decay:
+    max = 0.001
+    min = 0.000001
+

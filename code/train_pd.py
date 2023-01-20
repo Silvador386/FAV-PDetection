@@ -13,7 +13,7 @@ from mmdet.datasets import build_dataset
 from mmdet.models import build_detector
 
 
-def basic_train():
+def basic_train(learning_rate, weight_decay, epochs):
     config = "../configs/my_config/test_config.py"
     checkpoint = "../checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth"
     work_dir = "../work_dirs"
@@ -37,6 +37,10 @@ def basic_train():
     cfg.work_dir = work_dir
 
     cfg.gpu_ids = range(1)
+
+    cfg.optimizer.lr = learning_rate
+    cfg.optimizer.weight_decay = weight_decay
+    cfg.runner.max_epoch = epochs
 
     # create work_dir_path
     mmcv.mkdir_or_exist(osp.abspath(cfg.work_dir))
