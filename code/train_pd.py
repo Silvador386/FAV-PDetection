@@ -1,7 +1,6 @@
 import copy
 import time
 import mmcv
-import wandb
 import os.path as osp
 
 from mmdet.utils import collect_env
@@ -14,9 +13,7 @@ from mmdet.datasets import build_dataset
 from mmdet.models import build_detector
 
 
-def basic_train():
-    wandb.init()
-
+def basic_train(learning_rate, weight_decay, optimizer=None):
     config = "../configs/my_config/test_config.py"
     checkpoint = "../checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth"
     work_dir = "../work_dirs"
@@ -41,8 +38,12 @@ def basic_train():
 
     cfg.gpu_ids = range(1)
 
-    cfg.optimizer.lr = wandb.config.lr
-    cfg.optimizer.weight_decay = wandb.config.wd
+    if learning_rate:
+        cfg.optimizer.lr = learning_rate
+    if weight_decay:
+        cfg.optimizer.weight_decay = weight_decay
+    if optimizer:
+        cfg.optimizer.type = optimizer
 
     # create work_dir_path
     mmcv.mkdir_or_exist(osp.abspath(cfg.work_dir))
@@ -99,7 +100,7 @@ def basic_train():
 
 
 if __name__ == "__main__":
-    basic_train()
+    basic_train(None, None, None)
 
 
 

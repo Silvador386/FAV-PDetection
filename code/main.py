@@ -1,9 +1,8 @@
 from merge_pdestre2json import select_jsons_to_merge, merge_json_files
 from pdestre_conversion import *
-from settings import *
 from train import TrainManager
 from test import test
-import wandb
+from wandb_sweep import launch_sweep
 
 
 def convert_and_merge_pdestre(ann_dir,
@@ -36,26 +35,6 @@ def convert_and_merge_pdestre(ann_dir,
     #                  "small_train", merged_dir, overwrite=True)
     # merge_json_files(converted_ann_dir, test_files,
     #                  "small_test", merged_dir, overwrite=True)
-
-
-
-sweep_configuration = {
-    "name": "Testing-sweep",
-    "metric": {"name": "val_acc", "goal": "maximize"},
-    "method": "random",
-    "parameters": {
-        'lr': {'max': 0.005, 'min': 0.00005},
-        "wd": {'max': 0.001, 'min': 0.000001}
-    }
-}
-
-
-def launch_sweep():
-    from train_pd import basic_train
-
-    sweep_id = wandb.sweep(sweep_configuration, project="Test-Sweep")
-
-    wandb.agent(sweep_id, function=basic_train, count=5)
 
 
 
