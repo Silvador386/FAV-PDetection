@@ -14,12 +14,12 @@ from mmdet.models import build_detector
 
 
 def basic_train(learning_rate, weight_decay, optimizer=None):
-    config = "../configs/my_config/test_config.py"
+    config = "../configs/my_config/main_config_large.py"
     checkpoint = "../checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth"
     work_dir = "../work_dirs"
 
-    ann_train_file = "../data/P-DESTRE/coco_format/merged/micro.json"
-    ann_test_file = "../data/P-DESTRE/coco_format/merged/micro.json"
+    ann_train_file = "../data/P-DESTRE/coco_format/merged/large_train.json"
+    ann_test_file = "../data/P-DESTRE/coco_format/merged/large_test.json"
     img_prefix = "../data/P-DESTRE/coco_format/videos/"
 
     cfg = Config.fromfile(config)
@@ -46,6 +46,7 @@ def basic_train(learning_rate, weight_decay, optimizer=None):
         cfg.optimizer.type = optimizer
         if optimizer == "Adam":
             cfg.optimizer.pop("momentum")
+
     # create work_dir_path
     mmcv.mkdir_or_exist(osp.abspath(cfg.work_dir))
     timestamp = time.strftime('%Y%m%d_%H%M%S', time.localtime())

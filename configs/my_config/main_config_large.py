@@ -40,8 +40,8 @@ test_pipeline = [
 ]
 
 data = dict(
-    samples_per_gpu=8,
-    workers_per_gpu=8,
+    samples_per_gpu=3,
+    workers_per_gpu=3,
     train=dict(
         type=_dataset_type,
         # explicitly add your class names to the field `classes`
@@ -107,7 +107,7 @@ lr_config = dict(
     step=[15, 30]
     )
 
-runner = dict(type='EpochBasedRunner', max_epochs=20)
+runner = dict(type='EpochBasedRunner', max_epochs=2)
 
 checkpoint_config = dict(interval=2)
 log_config = dict(
@@ -126,6 +126,4 @@ log_config = dict(
 )
 
 workflow = [("train", 1), ("val", 1)]
-
-# load_from = "c:/Programming/Python Projects/FAV_PD/code/work_dirs/main_config/latest.pth"
 load_from = "../checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth"

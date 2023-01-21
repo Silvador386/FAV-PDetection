@@ -9,9 +9,9 @@ sweep_configuration = {
     "metric": {"name": "val/loss", "goal": "minimize"},
     "method": "bayes",
     "parameters": {
-        'lr': {'max': 0.005, 'min': 0.00005},
-        "wd": {'max': 0.001, 'min': 0.000001},
-        "optim": {"values": ["SGD", "Adam"]}
+        'lr': {'max': 0.005, 'min': 0.0001},
+        "wd": {'max': 0.001, 'min': 0.000005},
+        "optim": {"values": ["SGD"]}
     }
 }
 
@@ -19,7 +19,7 @@ sweep_configuration = {
 def launch_sweep():
     sweep_id = wandb.sweep(sweep_configuration, project="Test-Sweep")
 
-    wandb.agent(sweep_id, function=train_sweep_wrap, count=5)
+    wandb.agent(sweep_id, function=train_sweep_wrap, count=2)
 
 
 def train_sweep_wrap():
@@ -29,3 +29,7 @@ def train_sweep_wrap():
         optimizer = wandb.config.optim
 
         basic_train(learning_rate, weight_decay, optimizer)
+
+
+if __name__ == "__main__":
+    launch_sweep()
