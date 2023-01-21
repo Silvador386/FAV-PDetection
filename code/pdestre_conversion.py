@@ -1,13 +1,12 @@
 import os
 import cv2
 import mmcv
-
 from settings import *
 from utils import files_in_folder, write_to_json
 
 
 def convert_pdestre_anns(ann_dir, video_dir, converted_ann_dir, converted_img_dir,
-                         frame_rate, override_checks=False):
+                         frame_rate, overwrite=False):
     """
     Converts paired videos to jpg images and annotations to coco format json files.
 
@@ -17,7 +16,7 @@ def convert_pdestre_anns(ann_dir, video_dir, converted_ann_dir, converted_img_di
         converted_ann_dir (str): A path to the folder for formatted annotations.
         converted_img_dir (str): A path to the folder for images got from the video.
         frame_rate (int): Determines which frames should be converted (each 10th for instance).
-        override_checks (bool): Overrides checks if annotations are already present.
+        overwrite (bool): Overwrites annotations even if they are already present.
 
     """
 
@@ -32,13 +31,14 @@ def convert_pdestre_anns(ann_dir, video_dir, converted_ann_dir, converted_img_di
         likely_ann_path = f"{converted_ann_dir}/{name}.json"
 
         # Checks if the annotation file already exists. If so, skips the conversion.
-        if os.path.isfile(likely_ann_path) and not override_checks:
+        if os.path.isfile(likely_ann_path) and not overwrite:
             print(f"{likely_ann_path} already exists.")
             continue
 
         # Converts an annotation file with corresponding video.
         pdestre_anns_to_coco(ann_path, video_path, name, converted_ann_dir, converted_img_dir,
                              frame_rate=frame_rate)
+
 
 def check_pairs_in_dataset(ann_dir, video_dir):
     """

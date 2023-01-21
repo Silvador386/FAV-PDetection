@@ -19,7 +19,7 @@ def convert_and_merge_pdestre(ann_dir,
     print("\nConverting...\n")
     # Converts every video to images and every annotation to coco format .json file
     convert_pdestre_anns(ann_dir, video_dir,
-                         converted_ann_dir, converted_img_dir, frame_rate=frame_rate, override_checks=True)
+                         converted_ann_dir, converted_img_dir, frame_rate=frame_rate, overwrite=True)
 
     print("\nMerging...\n")
     # Create pdestre_large
@@ -31,9 +31,9 @@ def merge_dataset(converted_ann_dir, merged_dir, name, num_files, shuffle=True, 
     test_anns_name = f"{name}_test"
     train_files, test_files = select_jsons_to_merge(converted_ann_dir, num_files=num_files, shuffle=shuffle)
     merge_json_files(converted_ann_dir, train_files,
-                     train_anns_name, merged_dir, overwrite=overwrite)
+                     train_anns_name, merged_dir)
     merge_json_files(converted_ann_dir, test_files,
-                     test_anns_name, merged_dir, overwrite=overwrite)
+                     test_anns_name, merged_dir)
 
 
 def select_jsons_to_merge(json_dir, num_files=10, shuffle=False):
@@ -72,7 +72,7 @@ def select_jsons_to_merge(json_dir, num_files=10, shuffle=False):
     return train_filenames, test_filenames
 
 
-def merge_json_files(json_dir, json_files, name, output_dir, overwrite=False):
+def merge_json_files(json_dir, json_files, name, output_dir):
     """
     Merges all given json files in json_dir to a new json file that is stored in output_dir under the new name.
 
@@ -81,15 +81,10 @@ def merge_json_files(json_dir, json_files, name, output_dir, overwrite=False):
         json_files (list): A list of selected files to be merged in to a single .json file.
         name (str): A name of the new file.
         output_dir (str): A path to the folder where the formatted annotation will be stored.
-        overwrite (bool): Overwrites any pre-existent merged file.
 
     """
     output_path = f"{output_dir}/{name}.json"
     coco_json = {}
-    # Checks if the file already exists
-    if os.path.isfile(output_path) and not overwrite:
-        print(f"{output_path} already exists.")
-        return
 
     for file in json_files:
         if file.endswith(".json") and file != name + ".json":
