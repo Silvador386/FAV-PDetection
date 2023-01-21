@@ -1,6 +1,5 @@
 import os
 import cv2
-import json
 import mmcv
 
 from settings import *
@@ -40,6 +39,38 @@ def convert_pdestre_anns(ann_dir, video_dir, converted_ann_dir, converted_img_di
         # Converts an annotation file with corresponding video.
         pdestre_anns_to_coco(ann_path, video_path, name, converted_ann_dir, converted_img_dir,
                              frame_rate=frame_rate)
+
+def check_pairs_in_dataset(ann_dir, video_dir):
+    """
+    Checks for paired annotation and video names.
+
+    Args:
+        ann_dir (str): A path to the folder with annotations.
+        video_dir (str): A path to folder with videos.
+
+    Returns:
+         name_pairs: A list of strings (names of files that are paired).
+    """
+
+    annotation_names = files_in_folder(ann_dir)
+    video_names = files_in_folder(video_dir)
+
+    # remove .type suffix
+    annotation_type = f".{NEW_ANNOTATION_TYPE}"
+    video_type = f".{NEW_VIDEO_TYPE}"
+    for i, ann in enumerate(annotation_names):
+        annotation_names[i] = ann.removesuffix(annotation_type)
+    for i, vid in enumerate(video_names):
+        video_names[i] = vid.removesuffix(video_type)
+
+    name_pairs = []
+    for annotation_name in annotation_names:
+        if annotation_name in video_names:
+            # remove wrong data pairs:
+            if not annotation_name.startswith("._"):
+                name_pairs.append(annotation_name)
+
+    return name_pairs
 
 
 def pdestre_anns_to_coco(ann_path, video_path, file_name, output_folder, image_folder, frame_rate=10):
@@ -123,40 +154,6 @@ class Vid2ImgConverter:
         height, width = image.shape[:2]
         image_info = dict(file_name=img_name, width=width, height=height, id=image_id)
         self.coco_json["images"].append(image_info)
-
-
-def check_pairs_in_dataset(ann_dir, video_dir):
-    """
-    Checks for paired annotation and video names.
-
-    Args:
-        ann_dir (str): A path to the folder with annotations.
-        video_dir (str): A path to folder with videos.
-
-    Returns:
-         names_paired: A list of strings (names of files that are paired).
-    """
-
-    annotation_names = files_in_folder(ann_dir)
-    video_names = files_in_folder(video_dir)
-
-    # remove .type suffix
-    annotation_type = f".{NEW_ANNOTATION_TYPE}"
-    video_type = f".{NEW_VIDEO_TYPE}"
-    for i, ann in enumerate(annotation_names):
-        annotation_names[i] = ann.removesuffix(annotation_type)
-    for i, vid in enumerate(video_names):
-        video_names[i] = vid.removesuffix(video_type)
-
-    # check paired names
-    names_paired = []
-    for annotation_name in annotation_names:
-        if annotation_name in video_names:
-            # remove wrong data pairs:
-            if not annotation_name.startswith("._"):
-                names_paired.append(annotation_name)
-
-    return names_paired
 
 
 def load_anns_vidcap(ann_path, video_path):
