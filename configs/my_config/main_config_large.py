@@ -96,7 +96,7 @@ model = dict(
 
 evaluation = dict(metric="bbox", save_best="auto")
 
-optimizer = dict(type='SGD', lr=0.0007, momentum=0.9, weight_decay=0.00005)
+optimizer = dict(type='SGD', lr=0.0019, momentum=0.9, weight_decay=0.00028963)
 optimizer_config = dict(grad_clip=None)
 # learning policy
 lr_config = dict(
@@ -107,9 +107,9 @@ lr_config = dict(
     step=[15, 30]
     )
 
-runner = dict(type='EpochBasedRunner', max_epochs=2)
+runner = dict(type='EpochBasedRunner', max_epochs=40)
 
-checkpoint_config = dict(interval=2)
+checkpoint_config = dict(interval=4)
 log_config = dict(
     interval=50,
     hooks=[

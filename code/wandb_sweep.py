@@ -1,6 +1,5 @@
-import yaml
 import wandb
-from train_pd import basic_train
+from train import train
 
 
 sweep_configuration = {
@@ -27,7 +26,7 @@ def train_sweep_wrap():
         weight_decay = wandb.config.wd
         optimizer = wandb.config.optim
 
-        basic_train(learning_rate, weight_decay, optimizer)
+        train(learning_rate, weight_decay, optimizer)
 
 
 if __name__ == "__main__":

@@ -1,4 +1,4 @@
-program: train_pd.py
+program: train.py
 method: random
 metric:
   goal: maximize

@@ -1,98 +1,113 @@
-import random
-import os
-from itertools import product
+import copy
+import time
+import mmcv
+import os.path as osp
+
+from mmdet.utils import collect_env
+from mmdet.utils.logger import get_root_logger
+from mmdet.utils.util_distribution import get_device
+
+from mmcv import Config
+from mmdet.apis import init_random_seed, set_random_seed, train_detector
+from mmdet.datasets import build_dataset
+from mmdet.models import build_detector
 
 
-from mmdet.apis import init_detector
-from tools import train as mmdet_train
+def train(learning_rate=None, weight_decay=None, epochs=None, optimizer=None):
+    config = "../configs/my_config/main_config_large.py"
+    checkpoint = "../checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth"
+    work_dir = "../work_dirs"
+
+    ann_train_file = "../data/P-DESTRE/coco_format/merged/large_train.json"
+    ann_test_file = "../data/P-DESTRE/coco_format/merged/large_test.json"
+    img_prefix = "../data/P-DESTRE/coco_format/videos/"
+
+    cfg = Config.fromfile(config)
+
+    cfg.data.train.ann_file = ann_train_file
+    cfg.data.train.img_prefix = img_prefix
+
+    cfg.data.test.ann_file = ann_test_file
+    cfg.data.test.img_prefix = img_prefix
+
+    cfg.data.val.ann_file = ann_test_file
+    cfg.data.val.img_prefix = img_prefix
+
+    cfg.load_from = checkpoint
+    cfg.work_dir = work_dir
+
+    cfg.gpu_ids = range(1)
+
+    if learning_rate:
+        cfg.optimizer.lr = learning_rate
+    if weight_decay:
+        cfg.optimizer.weight_decay = weight_decay
+    if epochs:
+        cfg.runner.max_epochs = epochs
+    if optimizer:
+        cfg.optimizer.type = optimizer
+        if optimizer == "Adam":
+            cfg.optimizer.pop("momentum")
+
+    # create work_dir_path
+    mmcv.mkdir_or_exist(osp.abspath(cfg.work_dir))
+    timestamp = time.strftime('%Y%m%d_%H%M%S', time.localtime())
+    log_file = osp.join(cfg.work_dir, f'{timestamp}.log')
+    logger = get_root_logger(log_file=log_file, log_level=cfg.log_level)
+
+    # init the meta dict to record some important information such as
+    # environment info and seed, which will be logged
+    meta = dict()
+    # log env info
+    env_info_dict = collect_env()
+    env_info = '\n'.join([(f'{k}: {v}') for k, v in env_info_dict.items()])
+    dash_line = '-' * 60 + '\n'
+    logger.info('Environment info:\n' + dash_line + env_info + '\n' +
+                dash_line)
+    meta['env_info'] = env_info
+    meta['config'] = cfg.pretty_text
+    # log some basic info
+    logger.info(f'Config:\n{cfg.pretty_text}')
+
+    cfg.device = get_device()
+    # set random seeds
+    seed = init_random_seed(device=cfg.device)
+    logger.info(f'Set random seed to {seed}')
+    set_random_seed(seed)
+    cfg.seed = seed
+    meta['seed'] = seed
+
+    model = build_detector(
+        cfg.model,
+        train_cfg=cfg.get('train_cfg'),
+        test_cfg=cfg.get('test_cfg'))
+    model.init_weights()
+
+    datasets = [build_dataset(cfg.data.train)]
+    if len(cfg.workflow) == 2:
+        val_dataset = copy.deepcopy(cfg.data.val)
+        val_dataset.pipeline = cfg.data.train.pipeline
+        datasets.append(build_dataset(val_dataset))
+    if cfg.checkpoint_config is not None:
+        # save mmdet version, config file content and class names in
+        # checkpoints as meta data
+        cfg.checkpoint_config.meta = dict(
+            CLASSES=datasets[0].CLASSES)
+    # add an attribute for visualization convenience
+    model.CLASSES = datasets[0].CLASSES
+    train_detector(
+        model,
+        datasets,
+        cfg,
+        timestamp=timestamp,
+        meta=meta)
 
 
-import sanity_checks
+if __name__ == "__main__":
+    train()
 
 
-class TrainManager:
-    def __init__(self, config_path, work_dir):
-        self.config_path = config_path
-        self.work_dir = work_dir
-        self.options = []
-
-    def train(self, create_opts=False, **kwargs):
-        # train multiple times, with different options
-        if create_opts:
-            self.create_lr_wd_combs()
-            for option in self.options:
-                kwargs.update(option)
-                self.train_pipeline(**kwargs)
-        # train once with base options
-        else:
-            self.train_pipeline(**kwargs)
-
-    def train_pipeline(self, **kwargs):
-        # run train method
-        built_in_train(self.config_path, self.work_dir, **kwargs)
-
-        # plot_logs.plot_all_logs_in_dir(self.work_dir)
-
-        # creates images with predictions from the model
-        # output_path = "../results/test_json_anns/large"
-        # self.test_model_checkpoint_by_img_inference(output_dir=output_path)
-
-    def test_model_checkpoint_by_img_inference(self, output_dir):
-        checkpoint_latest = f"{self.work_dir}/latest.pth"
-        model = init_detector(self.config_path,
-                              checkpoint=checkpoint_latest, device='cuda:0')
-        sanity_checks.test_json_anns(config_path=self.config_path, output_dir=output_dir,
-                                     model=model, max_num=5)
-
-    def create_lr_wd_combs(self):
-        learning_rates = generate_uniform_values(0.005, 0.00005, 3)
-        weight_decays = generate_uniform_values(0.0001, 0.000001, 2)
-        combs = list(product(learning_rates, weight_decays))
-        for lr, wd in combs:
-            self.options.append(dict(optimizer=dict(type='SGD', lr=lr, momentum=0.9, weight_decay=wd)))
 
 
-def built_in_train(config_path, work_dir, **optional_args):
-    train_args = [config_path]
-    if work_dir:
-        train_args += ["--work-dir", work_dir]
-    if optional_args:
-        additional_options = ["--cfg-options"]
-        for listed_config_option in dict_generator(optional_args):
-            print(listed_config_option)
-            config_option_to_change = f"{'.'.join(listed_config_option[:-1])}={listed_config_option[-1]}"
-            additional_options.append(config_option_to_change)
-        train_args += additional_options
-
-    # train if changed build-in method (can accept arguments when called).
-    if mmdet_train.main.__code__.co_argcount > 0:
-        mmdet_train.main(train_args)
-    else:
-        # runs build-int train (tools/train.py) from console
-        run_arg = f"python ../tools/train.py {' '.join(train_args)}"
-        os.system(run_arg)
 
 
-def dict_generator(indict, previous=None):
-    """Recursively generates listed data from the nested data structure."""
-    previous = previous[:] if previous else []
-    if isinstance(indict, dict):
-        for key, value in indict.items():
-            if isinstance(value, dict):
-                for d in dict_generator(value, previous + [key]):
-                    yield d
-            elif isinstance(value, list) or isinstance(value, tuple):
-                for v in value:
-                    for d in dict_generator(v, previous + [key]):
-                        yield d
-            else:
-                yield previous + [key, value]
-    else:
-        yield previous + [indict]
-
-
-def generate_uniform_values(max_value, min_value, n) -> list:
-    if n <= 1:
-        return [min_value]
-    values = [random.uniform(min_value, max_value) for _ in range(n)]
-    return values
