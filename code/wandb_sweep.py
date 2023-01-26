@@ -3,9 +3,9 @@ from train import train
 
 
 sweep_configuration = {
-    "name": "Testing-sweep",
-    "metric": {"name": "val/loss", "goal": "minimize"},
-    "method": "bayes",
+    "name": "mAP - SGD",
+    "metric": {"name": "val/bbox_mAP", "goal": "maximize"},
+    "method": "random",
     "parameters": {
         'lr': {'max': 0.005, 'min': 0.0001},
         "wd": {'max': 0.001, 'min': 0.000005},
@@ -15,9 +15,9 @@ sweep_configuration = {
 
 
 def launch_sweep():
-    sweep_id = wandb.sweep(sweep_configuration, project="Test-Sweep")
+    sweep_id = wandb.sweep(sweep_configuration, project="Test-mAP")
 
-    wandb.agent(sweep_id, function=train_sweep_wrap, count=2)
+    wandb.agent(sweep_id, function=train_sweep_wrap, count=10)
 
 
 def train_sweep_wrap():
