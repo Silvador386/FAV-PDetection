@@ -6,7 +6,7 @@
 # Build Status
 Project has been finished.
 1. ~~Search for appropriate datasets.~~
-2. ~~Build train and test pipeline to retrain an existing R-CNN model (MMDetection: https://github.com/open-mmlab/mmdetection).~~
+2. ~~Build train and test pipeline to retrain an existing R-CNN model [MMDetection](https://github.com/open-mmlab/mmdetection).~~
    * ~~Download and prepare customized dataset.~~
    * ~~Choose a model.~~
    * ~~Retrain and fine-tune the model.~~
@@ -23,20 +23,18 @@ Project has been finished.
 * To assign and monitor trainings, the [Weights & Biases](https://wandb.ai) framework was used.
 * To run the training model on the computation cluster, a singularity image and the _sing_FAV_PD_wandb.sh_ bash script was used.
 
-  
 # File structure
- Project directory
-   |-- code
-   |-- configs
-   |     |-- pdestre
-   |
-   |-- checkpoints
-   |-- data
-         |-- P-DESTRE
-               |-- coco_format
-                     |-- merged  _# Annotations_ 
-                     |-- videos  _# Images cut from dataset videos_
-
+ Project directory\
+ &nbsp; |-- code\
+ &nbsp; |-- configs\
+ &nbsp; |&emsp;&emsp;|-- pdestre\
+ &nbsp; |\
+ &nbsp; |-- checkpoints\
+ &nbsp; |-- data\
+ &emsp;&emsp; |-- P-DESTRE\
+ &emsp;&emsp;&emsp; |-- coco_format\
+ &emsp;&emsp;&emsp;&emsp; |-- merged &emsp;_# Annotations_  
+ &emsp;&emsp;&emsp;&emsp; |-- videos &emsp;_# Images cut from dataset videos_
 
 ## Datasets
 Here is a list of datasets with the main focus on pedestrians.
