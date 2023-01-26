@@ -34,7 +34,7 @@ Project has been finished.
  &emsp;&emsp; |-- P-DESTRE\
  &emsp;&emsp;&emsp; |-- coco_format\
  &emsp;&emsp;&emsp;&emsp; |-- merged &emsp;_# Annotations_  
- &emsp;&emsp;&emsp;&emsp; |-- videos &emsp;_# Images cut from dataset videos_
+ &emsp;&emsp;&emsp;&emsp; |-- videos &emsp;_# Images cut from dataset videos, corresponding to the annotations_
 
 ## Datasets
 Here is a list of datasets with the main focus on pedestrians.
