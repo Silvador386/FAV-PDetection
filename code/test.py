@@ -10,7 +10,7 @@ KEY_ZONE_FRAME_RATE = 2
 FINER_ZONES = [(200, 300), (1400, 1480)]
 
 
-def test(config_file="../configs/my_config/main_config_large.py",
+def test(config_file="../configs/pdestre/main_config_large.py",
          checkpoint_file="./work_dirs/main_config_clc_loss/latest.pth"):
 
     output_dir = "../results/test"

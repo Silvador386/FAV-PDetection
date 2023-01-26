@@ -1,7 +1,9 @@
 import json
 import cv2
 import random
-
+import mmcv
+from mmcv import Config
+from mmdet.apis import init_detector, inference_detector, show_result_pyplot
 from utils import write_to_json
 
 
@@ -74,13 +76,9 @@ def resize_imgs(ann_path, img_dir, output_dir, size=(1300, 800)):
             cv2.imwrite(output_path, resized)
 
 
-def test_image_inference(ann_path, img_folder_path, model, output_dir, max_num=-1):
-    import mmcv
-    from mmdet.apis import init_detector, inference_detector, show_result_pyplot
-    from settings import DEFAULT_CONFIG, DEFAULT_CHECKPOINT, DEFAULT_CHECKPOINT_LATEST
-
+def test_image_inference(config, checkpoint, ann_path, img_folder_path, model, output_dir, max_num=-1):
     if model is None:
-        model = init_detector(DEFAULT_CONFIG, DEFAULT_CHECKPOINT_LATEST, device='cuda:0')
+        model = init_detector(config, checkpoint, device='cuda:0')
 
     images, annotations, categories = load_ann_data(ann_path)
     random.shuffle(images)
@@ -102,11 +100,10 @@ def test_image_inference(ann_path, img_folder_path, model, output_dir, max_num=-
             break
 
 
-def test_json_anns(config_path, output_dir=None, model=None, max_num=-1):
-    from mmcv import Config
-    config = Config().fromfile(config_path)
+def test_json_anns(config_path, checkpoint, output_dir=None, model=None, max_num=-1):
+    config = Config.fromfile(config_path)
     ann_path = config._ann_file_test
     img_dir = config._img_prefix
 
     test_rect_anns(ann_path, img_dir, output_dir, max_num)
-    test_image_inference(ann_path, img_dir, model, output_dir, max_num)
+    test_image_inference(config, checkpoint, ann_path, img_dir, model, output_dir, max_num)

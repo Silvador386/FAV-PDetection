@@ -2,27 +2,25 @@ _base_ = "../faster_rcnn/faster_rcnn_r50_fpn_2x_coco.py"
 
 
 # # 1. dataset settings
-_ann_file_train = "../data/P-DESTRE/coco_format/merged/large_train.json"
-_ann_file_test = "../data/P-DESTRE/coco_format/merged/large_test.json"
-_img_prefix = "../data/P-DESTRE/coco_format/videos/"
+_ann_file_train = "c:/Programming/Python Projects/FAV_PD/data/P-DESTRE/coco_format/merged/micro.json"
+_ann_file_test = "c:/Programming/Python Projects/FAV_PD/data/P-DESTRE/coco_format/merged/micro.json"
+_img_prefix = "c:/Programming/Python Projects/FAV_PD/data/P-DESTRE/coco_format/videos/"
 _dataset_type = 'CocoDataset'
 _classes = ("person",)
 _num_classes = len(_classes)
 
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
-
 train_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(type='LoadAnnotations', with_bbox=True, with_mask=True),
     dict(type='Resize', img_scale=(1333, 800), keep_ratio=True),
-    dict(type='RandomFlip', flip_ratio=0.5),
+    # dict(type='RandomFlip', flip_ratio=0),
     dict(type='Normalize', **img_norm_cfg),
     dict(type='Pad', size_divisor=32),
     dict(type='DefaultFormatBundle'),
     dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels', 'gt_masks']),
 ]
-
 test_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
@@ -31,7 +29,7 @@ test_pipeline = [
         flip=False,
         transforms=[
             dict(type='Resize', keep_ratio=True),
-            dict(type='RandomFlip', flip_ratio=0.5),
+            # dict(type='RandomFlip', flip_ratio=0),
             dict(type='Normalize', **img_norm_cfg),
             dict(type='Pad', size_divisor=32),
             dict(type='ImageToTensor', keys=['img']),
@@ -94,36 +92,41 @@ model = dict(
                 type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
             loss_bbox=dict(type='L1Loss', loss_weight=1.0))))
 
+
 evaluation = dict(metric="bbox", save_best="auto")
 
-optimizer = dict(type='SGD', lr=0.0019, momentum=0.9, weight_decay=0.00028963)
+optimizer = dict(type='SGD', lr=0.0003, momentum=0.9, weight_decay=0.00006)
+
+# optimizer = dict(_delete_=True, type='Adam', lr=0.001)
 optimizer_config = dict(grad_clip=None)
 # learning policy
 lr_config = dict(
     policy='step',
     warmup='linear',
-    warmup_iters=500,
+    warmup_iters=1,
     warmup_ratio=0.01,
-    step=[15, 30]
     )
 
-runner = dict(type='EpochBasedRunner', max_epochs=40)
+runner = dict(type='EpochBasedRunner', max_epochs=5)
 
-checkpoint_config = dict(interval=4)
+checkpoint_config = dict(interval=50)
 log_config = dict(
-    interval=50,
+    interval=1,
     hooks=[
         dict(type='TextLoggerHook'),
         dict(type='MMDetWandbHook',
-             init_kwargs={'project': 'FAV_PD'},
-             interval=50,
-             log_checkpoint=False,
+             init_kwargs={'project': 'Testing'},
+             interval=1,
+             log_checkpoint=True,
              log_checkpoint_metadata=True,
              num_eval_images=0,
              bbox_score_thr=0.3
              )
-    ]
+         ]
 )
 
+
 workflow = [("train", 1), ("val", 1)]
-load_from = "../checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth"
+
+
+load_from = "c:/Programming/Python Projects/FAV_PD/checkpoints/faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15.pth"

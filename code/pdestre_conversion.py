@@ -1,8 +1,11 @@
 import os
 import cv2
 import mmcv
-from settings import *
 from utils import files_in_folder, write_to_json
+
+
+ANN_TYPE = "txt"
+VIDEO_TYPE = "MP4"
 
 
 def convert_pdestre_anns(ann_dir, video_dir, converted_ann_dir, converted_img_dir,
@@ -19,13 +22,12 @@ def convert_pdestre_anns(ann_dir, video_dir, converted_ann_dir, converted_img_di
         overwrite (bool): Overwrites annotations even if they are already present.
 
     """
-
     names_paired = check_pairs_in_dataset(ann_dir, video_dir)
 
     # take each paired name, convert video to jpgs, create new COCO-style annotation
     for i, name in enumerate(names_paired):
-        video_path = f"{video_dir}/{name}.{NEW_VIDEO_TYPE}"
-        ann_path = f"{ann_dir}/{name}.{NEW_ANNOTATION_TYPE}"
+        video_path = f"{video_dir}/{name}.{ANN_TYPE}"
+        ann_path = f"{ann_dir}/{name}.{VIDEO_TYPE}"
 
         # test if already converted
         likely_ann_path = f"{converted_ann_dir}/{name}.json"
@@ -56,8 +58,8 @@ def check_pairs_in_dataset(ann_dir, video_dir):
     video_names = files_in_folder(video_dir)
 
     # remove .type suffix
-    annotation_type = f".{NEW_ANNOTATION_TYPE}"
-    video_type = f".{NEW_VIDEO_TYPE}"
+    annotation_type = f".{ANN_TYPE}"
+    video_type = f".{VIDEO_TYPE}"
     for i, ann in enumerate(annotation_names):
         annotation_names[i] = ann.removesuffix(annotation_type)
     for i, vid in enumerate(video_names):
