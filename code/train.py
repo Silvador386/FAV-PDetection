@@ -27,8 +27,8 @@ def train(learning_rate=None, weight_decay=None, optimizer=None, epochs=None):
     cfg.data.train.ann_file = ann_train_file
     cfg.data.train.img_prefix = img_prefix
 
-    cfg.data.test.ann_file = ann_test_file
-    cfg.data.test.img_prefix = img_prefix
+    cfg.data.predict.ann_file = ann_test_file
+    cfg.data.predict.img_prefix = img_prefix
 
     cfg.data.val.ann_file = ann_test_file
     cfg.data.val.img_prefix = img_prefix
