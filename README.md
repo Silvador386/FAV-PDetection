@@ -4,7 +4,6 @@
   * Pre-trained checkpoint used for fine-tuning: [Faster_rcnn_r50_fpn_2x_coco_bbox_mAP-0.384_20200504_210434-a5d8aa15](https://github.com/open-mmlab/mmdetection/tree/master/configs/faster_rcnn)
 
 # Build Status
-Project has been finished.
 1. ~~Search for appropriate datasets.~~
 2. ~~Build train and test pipeline to retrain an existing R-CNN model [MMDetection](https://github.com/open-mmlab/mmdetection).~~
    * ~~Download and prepare customized dataset.~~
@@ -16,12 +15,26 @@ Project has been finished.
 
 # Tech/Framework used
 * Python version: 3.9.8
-* Main framework used for object detection fine-tuning is [MMDetection](https://github.com/open-mmlab/mmdetection).
-* It is highly recommended cloning [MMDetection](https://github.com/open-mmlab/mmdetection) repository into the project directory to function properly. 
-  * Configs directory is required for pdestre configs to work properly.
-  * Tools directory provides many useful functions.
+* The main framework used for object detection fine-tuning is [MMDetection](https://github.com/open-mmlab/mmdetection).
 * To assign and monitor trainings, the [Weights & Biases](https://wandb.ai) framework was used.
 * To run the training model on the computation cluster, a singularity image and the _sing_FAV_PD_wandb.sh_ bash script was used.
+
+# Installation
+1. Install [MMDetection and the prerequisites](https://mmdetection.readthedocs.io/en/latest/get_started.html#installation).
+2. Clone [MMDetection](https://github.com/open-mmlab/mmdetection) repository into the project directory or:
+  * Download the configs directory from the repository. This is required as the config used for training and prediction
+    is based on the other configs (Faster-RCNN, run configuration, ...).
+  * Tools directory provides many useful built-in functions, namely train.py and test.py that work almost the same as 
+    the train and predict in this repository but are runnable from the cmd.
+3. Clone/download this project. 
+
+# How to run tran.py and predict.py
+* The train.py runs a basic model training based on the parameters filled in the script. These parameters overwrite the basic
+  configuration in the config file, meaning changes can be made in both but those from script have higher priority.
+  It is required to update the paths to the files. Everything else should be optional.
+* The predict.py builds a model based on the config and checkpoint. Gives boundary box predictions on the images in the directory and
+  outputs images with predictions and a json file with bounding boxes into the given directory. 
+  * There is an option to select images by a given frame rate, and to select "key zones" with a finer "key frame rate". 
 
 # File structure
  Project directory\

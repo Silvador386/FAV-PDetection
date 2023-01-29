@@ -1,6 +1,6 @@
 from train import train
 from wandb_sweep import launch_sweep
-from test import predict
+from predict import predict
 
 
 def main():

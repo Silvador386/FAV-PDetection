@@ -8,18 +8,19 @@ from utils import files_in_folder
 Parameters for selecting specific images in predict_img_dir methods.
 To predict on all images in the directory, set:
     * FRAME_RATE = 1
-    * KEY_ZONES to None    
+    * KEY_ZONES to None  
 """
-FRAME_RATE = 1
+FRAME_RATE = 20
 KEY_ZONE_FRAME_RATE = 2
-KEY_ZONES = None
+KEY_ZONES = [(200, 300), (1300, 1450)]  # A list of tuples with boundary values - boundaries of the key zones
 
 
 def predict(config_file,
             checkpoint_file,
             output_dir,
             img_prefix,
-            score_thr=0.3):
+            score_thr=0.3,
+            ):
 
     json_path = osp.join(output_dir, "eval.json")
 
