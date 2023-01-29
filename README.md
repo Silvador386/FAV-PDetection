@@ -22,10 +22,10 @@
 # Installation
 1. Install [MMDetection and the prerequisites](https://mmdetection.readthedocs.io/en/latest/get_started.html#installation).
 2. Clone [MMDetection](https://github.com/open-mmlab/mmdetection) repository into the project directory or:
-  * Download the configs directory from the repository. This is required as the config used for training and prediction
-    is based on the other configs (Faster-RCNN, run configuration, ...).
-  * Tools directory provides many useful built-in functions, namely train.py and test.py that work almost the same as 
-    the train and predict in this repository but are runnable from the cmd.
+   * Download the configs directory from the repository. This is required as the config used for training and prediction
+       is based on the other configs (Faster-RCNN, run configuration, ...).
+   * Tools directory provides many useful built-in functions, namely train.py and test.py that work almost the same as 
+     the train and predict in this repository but are runnable from the cmd.
 3. Clone/download this project. 
 
 # How to run tran.py and predict.py
@@ -47,7 +47,7 @@
  &emsp;&emsp; |-- P-DESTRE\
  &emsp;&emsp;&emsp; |-- coco_format\
  &emsp;&emsp;&emsp;&emsp; |-- merged &emsp;_# Annotations_  
- &emsp;&emsp;&emsp;&emsp; |-- videos &emsp;_# Images cut from dataset videos, corresponding to the annotations_
+ &emsp;&emsp;&emsp;&emsp; |-- videos &emsp;&ensp;_# Images cut from dataset videos, corresponding to the annotations_
 
 ## Datasets
 Here is a list of datasets with the main focus on pedestrians.
