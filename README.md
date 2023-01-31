@@ -49,7 +49,7 @@
  &emsp;&emsp;&emsp;&emsp; |-- merged &emsp;_# Annotations_  
  &emsp;&emsp;&emsp;&emsp; |-- videos &emsp;&ensp;_# Images cut from dataset videos, corresponding to the annotations_
 
-## Datasets
+# Datasets
 Here is a list of datasets with the main focus on pedestrians.
 The P-DESTRE dataset has been selected as the most appropriate for this application.
 
