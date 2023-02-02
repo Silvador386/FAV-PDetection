@@ -9,12 +9,12 @@ from utils import files_in_folder
 """
 Parameters for selecting specific images in predict_img_dir methods.
 To predict on all images in the directory, set:
-    * FRAME_RATE = 1
-    * KEY_ZONES to None  
+    * FRAME_RATE = 1     
+    * KEY_ZONES to []   (exemplary use: [(200, 300), (1300, 1450)])
 """
-FRAME_RATE = 20
+FRAME_RATE = 1
 KEY_ZONE_FRAME_RATE = 2
-KEY_ZONES = [(200, 300), (1300, 1450)]  # A list of tuples with boundary values - boundaries of the key zones
+KEY_ZONES = []
 
 
 def predict(_args):
