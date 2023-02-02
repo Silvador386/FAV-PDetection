@@ -1,3 +1,5 @@
+import argparse
+
 import mmcv
 import os.path as osp
 from mmdet.apis import init_detector, inference_detector
@@ -15,19 +17,34 @@ KEY_ZONE_FRAME_RATE = 2
 KEY_ZONES = [(200, 300), (1300, 1450)]  # A list of tuples with boundary values - boundaries of the key zones
 
 
-def predict(config_file,
-            checkpoint_file,
-            output_dir,
-            img_prefix,
-            score_thr=0.3,
-            ):
+def predict(_args):
+    args = parse_args(_args)
+
+    config = args.config
+    checkpoint = args.checkpoint
+    output_dir = args.output_dir
+    img_prefix = args.img_prefix
+    score_thr = float(args.score_thr)
 
     json_path = osp.join(output_dir, "eval.json")
 
-    model = init_detector(config_file, checkpoint_file, device='cuda:0')
+    model = init_detector(config, checkpoint, device='cuda:0')
 
     predict_img_dir_to_json(model, img_prefix, json_path, score_thr)
     predict_img_dir(model, img_prefix, output_dir, score_thr)
+
+
+def parse_args(_args):
+    parser = argparse.ArgumentParser(description="P-Destre predict.")
+    parser.add_argument('config', help="Model config file path")
+    parser.add_argument('checkpoint', help="Checkpoint file path")
+    parser.add_argument(
+        'output_dir',
+        help='the directory to save the file containing bboxes and images with predictions.')
+    parser.add_argument("img_prefix", help="Path to the directory with images.")
+    parser.add_argument("score_thr", default=0.3, help="Score threshold for the acceptable predictions.")
+    args = parser.parse_args(_args)
+    return args
 
 
 def predict_img_dir_to_json(model, img_prefix, json_path, score_thr=0.3):
@@ -88,3 +105,8 @@ def in_key_zone(frame_idx, key_frame_zones):
         if any([zone[0] < frame_idx < zone[1] for zone in key_frame_zones]):
             return True
     return False
+
+
+if __name__ == "__main__":
+    import sys
+    predict(sys.argv[1:])
