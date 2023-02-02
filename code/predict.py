@@ -42,7 +42,7 @@ def parse_args(_args):
         'output_dir',
         help='the directory to save the file containing bboxes and images with predictions.')
     parser.add_argument("img_prefix", help="Path to the directory with images.")
-    parser.add_argument("score_thr", default=0.3, help="Score threshold for the acceptable predictions.")
+    parser.add_argument("--score_thr", default=0.3, help="Score threshold for the acceptable predictions.")
     args = parser.parse_args(_args)
     return args
 

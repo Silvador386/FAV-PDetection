@@ -36,7 +36,7 @@
   * To train on the whole dataset use the _main_config_large.py_ config.
 * The predict.py script builds a model based on the config and checkpoint provided. Gives boundary box predictions on the images in the directory and
   outputs images with predictions and a json file with bounding boxes into the given directory. 
-  * It is runnable both from the script and from the cmd. The **config**, **checkpoint**, **output_dir** and **img_prefix** (directory with images) paths must be provided. Also, a specific score threshold (**score_thr**) may be set (default is 0.3). 
+  * It is runnable both from the script and from the cmd. The **config**, **checkpoint**, **output_dir** and **img_prefix** (directory with images) paths must be provided. Score threshold (**--score_thr**) is optional (default is 0.3). 
   * There is also an option to select images by different frame rates by selecting "key zones" with a different "key frame rate". This option may be used by changing constants in the script.
 
 # File structure
