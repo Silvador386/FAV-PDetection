@@ -21,12 +21,13 @@
 
 # Installation
 1. Install [MMDetection and the prerequisites](https://mmdetection.readthedocs.io/en/latest/get_started.html#installation).
-3. Clone/download this project. 
-2. Copy [MMDetection](https://github.com/open-mmlab/mmdetection) repository into the project directory or:
+2. Clone/download this project. 
+3. Copy [MMDetection](https://github.com/open-mmlab/mmdetection) repository into the project directory or:
    * Download the configs directory from the repository. This is required as the config used for training and prediction
        is based on the other configs (Faster-RCNN, run configuration, ...) and place them to the project root as in the _File structure_.
    * Tools directory provides many useful built-in functions, namely train.py and test.py. These work almost the same as 
      the train and predict in this repository but are runnable from the cmd.
+4. Download the checkpoint (_pdestre_best.pth_) from [Google Drive](https://drive.google.com/drive/folders/1vxhSwhJfD0cPBnVBTgXYyUjB8u_ya2nE?usp=share_link).
 
 # How to run tran.py and predict.py
 * The train.py runs a basic model training based on the parameters filled in this script. These parameters overwrite the basic
